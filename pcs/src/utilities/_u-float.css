@@ -1,0 +1,29 @@
+/*
+ * float
+ *
+ * clearfix
+ * left
+ * right
+ */
+
+.u-clearfix:before,
+.u-clearfix:after { content: " "; display: table; }
+.u-clearfix:after { clear: both; }
+
+.u-float-left { float: left !important; }
+.u-float-right { float: right !important; }
+
+@media (--screen-md) {
+  ._md-u-float-left { float: left !important; }
+  ._md-u-float-right { float: right !important; }
+}
+
+@media (--screen-lg) {
+  ._lg-u-float-left { float: left !important; }
+  ._lg-u-float-right { float: right !important; }
+}
+
+@media (--screen-xl) {
+  ._xl-u-float-left { float: left !important; }
+  ._xl-u-float-right { float: right !important; }
+}

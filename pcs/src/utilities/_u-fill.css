@@ -1,0 +1,18 @@
+/*
+ * fill container
+ *
+ * fill
+ * fill-x
+ * fill-y
+ * fill-t
+ * fill-b
+ * fill-l
+ * fill-r
+ */
+.u-fill { top: 0; right: 0; bottom: 0; left: 0; }
+.u-fill-x { left: 0; right: 0; }
+.u-fill-y { top: 0; bottom: 0; }
+.u-fill-t { top: 0; left: 0; right: 0; }
+.u-fill-b { bottom: 0; left: 0; right: 0; }
+.u-fill-l { left: 0; top: 0; bottom: 0; }
+.u-fill-r { right: 0; top: 0; bottom: 0; }

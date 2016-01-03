@@ -1,0 +1,11 @@
+/*
+ * Utility classes for resetting or modifying typographic properties
+ *
+ */
+
+.u-listReset { list-style: none; }
+
+.u-fontReset {
+		font-size: 1em;
+		line-height: 1;
+}
