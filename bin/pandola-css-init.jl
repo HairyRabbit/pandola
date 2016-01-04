@@ -1,29 +1,34 @@
 #!/usr/bin/env julia
 
-path = "$(homedir())/pandola/pcs/dist/"
+home = homedir()
+namespace = "pandola"
+pcs_dist_path = "$home/$namespace/pcs/dist/"
+pcs_build_in = readdir(pcs_dist_path)
+target = pwd()
 
 function check_exist(f)
-    target = "$(pwd())/$f"
-    return isfile(target)
-end    
+    target_path = "$target/$f"
+    return isfile(target_path)
+end
 
 function make_link(f)
-    file = basename(f)
-    from = "$path$file"
-    to = "$(pwd())/$file"
+    file_path = basename(f)
+    from = "$pcs_dist_path$file_path"
+    to = "$target/$file_path"
     println("Make Link:\n$from ->\n$to")
     symlink(from, to)
     println("OK\n")
 end
 
-function main()
-    files = readdir(path)
-    result_checked = all(map(check_exist, files))
+function main()   
+    
+    result_checked = all(map(check_exist, pcs_build_in))
+    
     if !result_checked
-        println("OK, Check done.\n")
-        map(make_link, files)
+        println("OK, Checked done. Begin make links.\n")
+        map(make_link, pcs_build_in)
     else
-        println("Err, Files existed.")
+        println("Sorry, Files existed. Please use pandola-css-clear rm files.")
     end
 end
 
