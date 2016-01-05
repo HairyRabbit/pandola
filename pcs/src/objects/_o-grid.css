@@ -1,14 +1,11 @@
 /**
  * Grid
  * 
- * n / 12
- * 1 / n
+ * 1. n / 12
+ * 2. 1 / n
  */
 
-.o-col {
-		box-sizing: border-box;
-		float: left;
-}
+.o-col { box-sizing: border-box; float: left; }
 
 /* n / 12 */
 .o-col-1 { width: calc(1 / 12 * 100%); }
