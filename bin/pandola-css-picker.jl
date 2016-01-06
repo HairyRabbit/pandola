@@ -7,10 +7,11 @@ str = """
   <div class="o-col o-col-4"></div>
 </div>
 """
+
 str = open(readall, "index.html")
     
 re = r"class=\"?\'?([\w-\s]+)\"?\'?"
-
+#
 function pick_class(rm, acc = [])
     if rm == nothing
         return acc;
@@ -20,6 +21,21 @@ function pick_class(rm, acc = [])
 end
 
 res = pick_class(match(re, str, 1))
+#println(res)
 
-res1 = map(x -> x.captures[1], map(x -> match(re, x), res))
-println(res1)
+#res1 = map(x -> split(x.captures[1], r"\s"), map(x -> match(re, x), res))
+
+function report(x)
+    println("OK, pick -> $x\n")
+    x
+end
+
+function find_class(x)
+    
+end
+res1 = map(x -> split(x, r"\s"), map(report, map(x -> x.captures[1], map(x -> match(re, x), res))))
+
+#println(res1)
+
+
+

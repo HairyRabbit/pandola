@@ -26,7 +26,7 @@ function main()
     
     if !result_checked
         println("OK, Checked done. Begin make links.\n")
-        map(make_link, pcs_build_in)
+        foreach(make_link, pcs_build_in)
     else
         println("Sorry, Files existed. Please use pandola-css-clear rm files.")
     end
