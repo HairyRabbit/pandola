@@ -1,12 +1,6 @@
 #!/usr/bin/env julia
 
-str = """
-<div class="u-clearfix s-sb1 s-red-100">
-  <div class="o-col o-col-2"></div>
-  <div class="o-col o-col-3"></div>
-  <div class="o-col o-col-4"></div>
-</div>
-"""
+#Pkg.add("AnsiColor")
 
 str = open(readall, "index.html")
     
@@ -21,21 +15,24 @@ function pick_class(rm, acc = [])
 end
 
 res = pick_class(match(re, str, 1))
-#println(res)
 
-#res1 = map(x -> split(x.captures[1], r"\s"), map(x -> match(re, x), res))
-
-function report(x)
-    println("OK, pick -> $x\n")
-    x
+match_class(x) = match(re, x).captures[1]
+split_class(x) = split(x, r"\s")
+find_class(x) = x |> match_class |> split_class
+reduce_class(acc, x) = begin    
+    fill_acc(acc, x) = begin
+        if x == "" || x ∈ acc
+            print("OK, find -> \"$x\". But existed. ")
+            print("\e[0;33;49mSkip\e[0m\n")
+            acc
+        else
+            print("OK, find -> \"$x\". ")
+            print("\e[0;32;49mThunk\e[0m\n")
+            push!(acc, x);
+        end
+    end
+    foreach(y -> fill_acc(acc, y), x)
+    acc
 end
 
-function find_class(x)
-    
-end
-res1 = map(x -> split(x, r"\s"), map(report, map(x -> x.captures[1], map(x -> match(re, x), res))))
-
-#println(res1)
-
-
-
+res1 = reduce(reduce_class, [], map(find_class, res)) |> sort # |> println
