@@ -23,3 +23,9 @@
 		border-bottom-width: var(--border-width);
 		border-bottom-color: var(--border-color);
 }
+
+.u-border-none { border: 0; }
+
+.u-rounded { border-radius: 4px; }
+.u-circle { border-radius: 50%; }
+.u-rounded-none { border-radius: 0; }
