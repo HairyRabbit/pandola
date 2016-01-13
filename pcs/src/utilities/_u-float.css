@@ -6,10 +6,6 @@
  * right
  */
 
-.u-clearfix:before,
-.u-clearfix:after { content: " "; display: table; }
-.u-clearfix:after { clear: both; }
-
 .u-float-left { float: left !important; }
 .u-float-right { float: right !important; }
 

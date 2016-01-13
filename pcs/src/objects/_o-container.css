@@ -10,15 +10,15 @@
 .o-con { margin-left: auto; margin-right: auto; }
 
 /* widths list. */
-.o-con-320 { max-width: 320; }
-.o-con-400 { max-width: 400; }
-.o-con-480 { max-width: 480; }
-.o-con-640 { max-width: 640; }
-.o-con-720 { max-width: 720; }
-.o-con-768 { max-width: 768; }
-.o-con-800 { max-width: 800; }
-.o-con-960 { max-width: 960; }
-.o-con-980 { max-width: 960; }
-.o-con-1000 { max-width: 1000; }
-.o-con-1200 { max-width: 1200; }
-.o-con-1400 { max-width: 1400; }
+.o-con-320 { max-width: 320px; }
+.o-con-400 { max-width: 400px; }
+.o-con-480 { max-width: 480px; }
+.o-con-640 { max-width: 640px; }
+.o-con-720 { max-width: 720px; }
+.o-con-768 { max-width: 768px; }
+.o-con-800 { max-width: 800px; }
+.o-con-960 { max-width: 960px; }
+.o-con-980 { max-width: 960px; }
+.o-con-1000 { max-width: 1000px; }
+.o-con-1200 { max-width: 1200px; }
+.o-con-1400 { max-width: 1400px; }
