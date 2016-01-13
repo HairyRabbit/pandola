@@ -1,0 +1,8 @@
+.c-field {
+		background-color: transparent;
+		border: none;
+		line-height: 1;
+		font-size: 1em;
+}
+
+.c-field-block { min-width: 100%; }

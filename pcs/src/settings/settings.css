@@ -1,6 +1,4 @@
 /*
- * GEMMA/SETTINGS
- *
  * CSS custom properties, custom media queries, and other
  * pieces of code which do not directly output
  * CSS classes themselves.
@@ -10,4 +8,5 @@
 @import './_mediaQueries.css';
 @import './_color.css';
 @import './_spacing.css';
+@import './_border.css';
 @import './_shadows.css';

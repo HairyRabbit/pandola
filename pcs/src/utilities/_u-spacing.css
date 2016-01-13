@@ -49,6 +49,20 @@
 .u-pl4 { padding-left: var(--spacing-4); }
 .u-pl5 { padding-left: var(--spacing-5); }
 
+.u-px0 { padding-left: 0; padding-right: 0; }
+.u-px1 { padding-left: var(--spacing-1); padding-right: var(--spacing-1); }
+.u-px2 { padding-left: var(--spacing-2); padding-right: var(--spacing-2); }
+.u-px3 { padding-left: var(--spacing-3); padding-right: var(--spacing-3); }
+.u-px4 { padding-left: var(--spacing-4); padding-right: var(--spacing-4); }
+.u-px5 { padding-left: var(--spacing-5); padding-right: var(--spacing-5); }
+
+.u-py0 { padding-top: 0; padding-bottom: 0; }
+.u-py1 { padding-top: var(--spacing-1); padding-bottom: var(--spacing-1); }
+.u-py2 { padding-top: var(--spacing-2); padding-bottom: var(--spacing-2); }
+.u-py3 { padding-top: var(--spacing-3); padding-bottom: var(--spacing-3); }
+.u-py4 { padding-top: var(--spacing-4); padding-bottom: var(--spacing-4); }
+.u-py5 { padding-top: var(--spacing-5); padding-bottom: var(--spacing-5); }
+
 .u-m0 { margin: 0; }
 .u-m1 { margin: var(--spacing-1); }
 .u-m2 { margin: var(--spacing-2); }
