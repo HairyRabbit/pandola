@@ -2,20 +2,22 @@
 
 home = homedir()
 namespace = "pandola"
-pcs_dist_path = "$home/$namespace/pcs/dist/"
-pcs_build_in = readdir(pcs_dist_path)
 target = pwd()
 
-target_path = f -> "$target/$f"
-
-function clear_file(path)
-    rm(path)
-    println("Clear \"$path\" done.")
-end
-
+# Main call.
 function main()
-    map(clear_file, filter(isfile, map(target_path, pcs_build_in)))
-    println("Clear done.")    
+    file_name = "index.css"
+    pcs_dist_path = "$home/$namespace/pcs/dist/$file_name"
+    target_file = "$target/$file_name"
+
+    if target_file |> isfile
+        rm(target_file)
+        println("\nOK, Clear done.\n")
+    else
+        println("\nOK, No need to clear.\n")
+    end
+    
+    
 end
 
 main()
