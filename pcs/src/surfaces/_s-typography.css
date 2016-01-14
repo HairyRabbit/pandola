@@ -1,6 +1,4 @@
 /*
- * GEMMA/TYPOGRAPHIC SURFACES
- *
  * For changing typographic properties.
  *
  */
@@ -29,6 +27,13 @@
   .s-h6 { font-size: 1em; }
 }
 
+.s-small {
+		font-size: 0.85em;
+}
+.s-smaller {
+		font-size: 0.7em;
+}
+
 /*
  * FONT-WEIGHT
  */
@@ -50,6 +55,18 @@
   font-size: 0.666em;
   text-transform: uppercase;
   letter-spacing: 0.125em;
+}
+
+.s-throughLine {
+		text-decoration: line-through;		
+}
+
+.s-underLine {
+		text-decoration: underline;
+}
+
+.s-overLine {
+		text-decoration: overline;
 }
 
 /*

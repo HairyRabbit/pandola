@@ -9,3 +9,12 @@
 		font-size: 1em;
 		line-height: 1;
 }
+
+.u-listLine {
+		border-bottom-style: solid;
+		border-bottom-width: var(--border-width);
+		border-bottom-color: var(--border-color);
+}
+.u-listLine:last-child {
+		border: none;
+}

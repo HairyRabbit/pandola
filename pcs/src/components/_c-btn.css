@@ -1,0 +1,17 @@
+.c-btn {
+		background: transparent;
+		/* border: 0; */
+		display: inline-block;
+		position: relative;		
+		line-height: 1;		
+		/* font-size: 1em; */
+		padding: 0.5em 0.8em;
+		cursor: pointer;		
+}
+
+/**
+.c-btn-border { border: 1px solid #DDD; }
+.c-btn-block { width: 100%; }
+.c-btn-small { font-size: 0.85em; }
+.c-btn-large { font-size: 1.5em; }
+*/
