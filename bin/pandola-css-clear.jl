@@ -5,7 +5,7 @@ namespace = "pandola"
 target = pwd()
 
 # Main call.
-function main()
+main() = begin
     file_name = "index.css"
     pcs_dist_path = "$home/$namespace/pcs/dist/$file_name"
     target_file = "$target/$file_name"
@@ -16,8 +16,6 @@ function main()
     else
         println("\nOK, No need to clear.\n")
     end
-    
-    
 end
 
 main()
