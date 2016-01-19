@@ -323,4 +323,95 @@ getUserCount(): number {
 
 试着把刚才的数据移到service里，新建一个文件`app/user.service.ts`:
 
+```typescript
+/* @file app/user.service.ts */
+import { Injectable } from 'angular2/core'
+
+export interface User {
+  id: number
+  name: string
+}
+
+@Injectable()
+export class UserService {
+  getUser(): Promise<User[]> {
+    return Promise.resolve([])
+  }
+}
+```
+
+快来看，我们遇到了第二个注解`@Injectable`。这个注解的作用是将service注入到其他依赖的地方，从名字就能看出端倪。
+
+然后还做了一些工作，把`app/user-list.component.ts`中的`User`接口移了过来，并用`export`导出。在UserService类中写了一个方法`getUser`，他返回一个`Promise`，用来模拟从服务器端请求数据，然后这个Promise返回了空列表`[]`。
+
+这样我们的`app/user-list.component.ts`要做一些改动了：
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { User, UserService } from './user.service'
+
+const component = {
+  selector: 'user-list',
+  template: `
+    <div *ngIf="getUserCount()">
+      <ul>
+        <li *ngFor="#user of users">
+        {{user.name}}
+        </li>
+      </ul>
+      <p>用户的数量是：{{getUserCount()}}</p>
+    </div>
+    <div *ngIf="!getUserCount()">
+      <p>木有用户(°Д°)</p>
+    </div>
+  `
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+
+  constructor(private _service: UserService) {}
+  
+  users: User[]
+
+  getUserCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+  
+  ngOnInit(): void {
+    this._service.getUser().then(users => this.users = users)
+  }
+}
+```
+
+改了不少东西。首先将`User`类型和`UserService`导入。然后在组件类中定义了一个构造函数
+
+```typescript
+constructor(private _service: UserService) {}
+```
+
+这里的`_service`就是`UserService`，`private`是访问修饰符表示私有。在`getUserCount`添加了空数组处理。而在`ngOnInit`钩子里，请求了`service`的方法，并用`Promise`的写法将数据赋给`this.users`，当然，他的值是`[]`。
+
+悲剧的是，浏览器刷新后报错了，ng抱怨说没有提供`UserService`，为什么呢？
+
+之所以写在构造函数里的原因就是在构造时需要`UserService`，那什么时候构造的呢？你猜对了，是在`AppComponent`那边。所以要修改一下`app/app.component.ts`：
+
+```typescript
+import { UserService } from './user.service';
+
+const component = {
+  selector: 'my-app',
+  directives: [UserListComponent],
+  providers: [UserService],
+  template: `
+    <h1>Hello World</h1>
+    <user-list></user-list>
+  `
+}
+```
+
+这样就可以了。接下来实现增加和删除功能。
+
 
