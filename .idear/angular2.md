@@ -5,7 +5,7 @@
 不知道大家在2015年收获怎样呢，**react**是不是已经6到爆炸。仔细回想一下，确实变化也是翻天覆地，react，webpack，ember2，redux……
 
 2016，不如来看下**ng2**吧。
-
+	
 # 这是又一本带大家入坑的小书
 
 ng的话大家已经都很熟悉了，即使没有真正玩过，也会每天听到这个词，烦到不行。这个mvvm框架是目前使用人数最多的mvc框架。恩，当然，这次我们的主角并不是ng，而是**ng2**。
@@ -24,7 +24,7 @@ nodejs安装很简单，在官网上下载好一直下一步就可以装好。�
 
 * 启动
 * 组件
-* 模板绑定
+* 模板与绑定
 * 服务
 * 路由
 
@@ -158,7 +158,7 @@ npm start
 `<my-app>`是做什么的？我想你应该已经知道了，这是程序的根节点，我们写的全部东东都在这个标签下面。其他框架不也是这么做的么？想想
 
 ```js
-ReactDOM.render(<app />, document.getElementById('id'))
+ReactDOM.render(<app />, document.getElementById('my-app'))
 ```
 
 和
@@ -200,7 +200,7 @@ bootstrap(AppComponent)
 
 这就是启动方式，不用说可以明白。保存片刻之后浏览器会自动刷新。Hello World完成:joy:。
 
-接下来看下强大的模板功能
+接下来看下强大的模板功能。
 
 # 没错，模板就是最强大的
 
@@ -233,7 +233,7 @@ export class UserListComponent implements OnInit {
   users: User[]
   
   ngOnInit() {
-    this.users = users
+    this.users = users || []
   }
 }
 
@@ -262,6 +262,65 @@ var tempStr = `this is ${test} template string`
 
 最下面就是一些静态数据，他的类型签名是`User[]`。
 
-来看下效果吧，页面应该早就刷新好了。
+然后要做的工作就是把这个组件塞到之前的`AppComponent`的组件里面：
+
+```typescript
+import { UserListComponent } from './user-list.component'
+
+const component = {
+  selector: 'my-app',
+  directives: [UserListComponent],
+  template: `
+    <h1>Hello World</h1>
+    <user-list></user-list>
+  `
+}
+```
+
+要想使用`<user-list>`，必须先用import将他导进来，然后声明`directives: [UserListComponent]`。之后也是这样，要想使用我们自定义的组件，这两步是必须的。
+
+来看下效果吧，页面应该刷新好了。
 
 接下来再来看一些模板。
+
+# 太简单了，老板再来一些模板
+
+我要实现一个功能，在空列表时显示一句话告诉别人没有用户，而在不为空时显示用户列表。要实现这个，需要用到`*ngIf`:
+
+```typescript
+template: `
+  <div *ngIf="getUserCount()">
+    <ul>
+      <li *ngFor="#user of users">
+        {{user.name}}
+      </li>
+    </ul>
+    <p>用户的数量是：{{getUserCount()}}</p>
+  </div>
+  <div *ngIf="!getUserCount()">
+    <p>木有用户(°Д°)</p>
+  </div>
+`
+```
+
+在组件`UserListComponent`里添加一个`getUserCount`方法：
+
+```typescript
+getUserCount(): number {
+  return this.users.length
+}
+```
+
+注意他的类型签名，这个方法返回一个数字，也就是`number`类型。
+
+静态数据`users`已经没用了，可以把它删掉了。浏览器刷新后，会看到空列表模板。
+
+显示列表已经完全没有问题，接下来让我们做一些更有意思的功能，比如增加和删除。
+
+# 来点更有意思的吧
+
+在这之前我想先声明一点，在组件里那样处理数据是不好的习惯。合理的做法是用一些方法来单独处理数据，在组件里只需要调用这些方法。在ng2里面，他叫做**service**。
+
+试着把刚才的数据移到service里，新建一个文件`app/user.service.ts`:
+
+
