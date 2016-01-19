@@ -167,9 +167,9 @@ ReactDOM.render(<app />, document.getElementById('id'))
 Ember.Application.create();
 ```
 
-接下来就来实现我们的`Hello world`。
+接下来就来实现我们的`Hello World`。
 
-先来创建我们的第一个组件，名字就是`AppComponent`。首先创建一个`app`文件夹，然后在里面新建文件`app.component.ts`。注意后缀名，我们要用的typescript。
+先来创建我们的第一个组件`AppComponent`。首先创建一个`app`文件夹，然后在里面新建文件`app/app.component.ts`。注意后缀名，我们要用的**TypeScript**。
 
 ```typescript
 /* @file app/app.component.ts */
@@ -177,18 +177,18 @@ import { Component } from 'angular2/core'
 
 const component = {
   selector: 'my-app',
-  template: '<h1>Hello world</h1>'
+  template: '<h1>Hello World</h1>'
 }
 
 @Component(component)
 export class AppComponent { }
 ```
 
-好多新东西。上面一行是模块导入，我们需要`angular2/core`的`Component`来构建我们的组件；接下来定义了一个对象，`selector`就是之前看到的标签名字`my-app`，`templete`是要显示的内容；最下面导出了AppComponent组件，然后再上面一行`@Component`是一个注解，表示这是一个ng2的组件。当然啦，这只是一个语法糖，其实就是`Component(component)(AppComponent)`，那么写为了增加颜值，也更清除的看到这个组件的特性。后面还会遇到一些注解。
+好多新东西。上面一行是模块导入，我们需要`angular2/core`的`Component`来构建我们的组件；接下来定义了一个对象，`selector`就是之前看到的标签名字`my-app`，`templete`是要显示的内容；最下面导出了AppComponent组件，然后再上面一行`@Component`是一个注解，表示这是一个ng2的组件。当然啦，这只是一个语法糖，其实就是`Component(component)(AppComponent)`，那么写可以增加颜值，也更清楚的看到这个组件的特性。后面还会遇到一些注解。
 
-有了AppComponent组件还不能看到效果，因为我们还木有启动（安装）他。
+有了AppComponent组件还不能看到效果，因为还木有启动（安装）。
 
-新建一个`boot.ts`：
+新建一个`app/boot.ts`：
 
 ```typescript
 /* @file app/boot.ts */
@@ -198,6 +198,70 @@ import { AppComponent } from './app.component'
 bootstrap(AppComponent)
 ```
 
-这就是启动方式，不用说就可以看明白。保存片刻之后浏览器会自动刷新。Hello World完成:joy:。
+这就是启动方式，不用说可以明白。保存片刻之后浏览器会自动刷新。Hello World完成:joy:。
 
+接下来看下强大的模板功能
 
+# 没错，模板就是最强大的
+
+展示模板的最好方法就是弄一个列表出来，然后再花样显示上去。
+
+Hello World就留着好了。再来新建一个组件`UserListComponent`，新建文件`app/user-list.component.ts`
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+
+interface User {
+  id: number
+  name: string
+}
+
+const component = {
+  selector: 'user-list',
+  template: `
+    <ul>
+      <li *ngFor="#user of users">
+      {{user.name}}
+      </li>
+    </ul>
+  `
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+  users: User[]
+  
+  ngOnInit() {
+    this.users = users
+  }
+}
+
+const users: User[] = [
+  { id: 1, name: 'aaa' },
+  { id: 2, name: 'bbb' },
+  { id: 3, name: 'ccc' }
+]
+```
+
+额，这次有点多。总之还是从上之下来看吧。首先除了`Component`还引入了`OnInit`这是个接口。什么？JS也有接口？是的，TS有，这个接口表示要实现我们自定义的初始化方法，稍后会看到。
+
+然后我们自己定义了一个接口……好吧，我感觉你已经晕了。那这个是用来做什么的呢？我们知道JS是没有类型一说，而TS就是要解决这个问题，而这里的`interface User`就是我们自定义的类型，他的类型为`User`。这里简单定义了两个属性，`id`和`name`。
+
+接下来要轻松一些，是之前见到过的东西`component`。`template`有些特别，这里不再是字符串，而是用了es6中模板字符串。模板字符串用```表示，他除了可以多行显示外，还可以将变量插入到字符串中，来代替之前的用`+`拼接字符串：
+
+```js
+var test = 'test'
+var oldConcatStr = 'this is ' + test + 'template string'
+var tempStr = `this is ${test} template string`
+```
+
+当然，还有重要的`*ngFor`，名字可以看出来，他用于循环列表。`#user of users`表示我们要循环`users`，每一项用`user`来表示。然后`{{user.name}}`就是说要区`user`的`name`属性。`user`就是`#user of users`中的`user`。
+
+接下来是导出组件，`UserListComponent`组件实现了`OnInit`，就像之前所说的那样。然后在里面定义一些属性。`users`你肯定已经知道了，但是要注意一下写法`users: User[]`，其中`: User[]`表示`user`的类型为`User[]`。`User`前面已经定义好了，带一个`[]`表示他是一个数组，数组里面的每一项都是`User`类型。这里并没有给他赋值，因为我想在组件初始化的时候给他赋值。那么接下来的这个方法就用来做这件事情。`ngOnInit`是一个钩子方法，目的就是刚才说的，要自定义初始化方法，`implements OnInit`也是这个意思。
+
+最下面就是一些静态数据，他的类型签名是`User[]`。
+
+来看下效果吧，页面应该早就刷新好了。
+
+接下来再来看一些模板。
