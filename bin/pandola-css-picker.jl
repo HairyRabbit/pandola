@@ -8,7 +8,7 @@ find_file(x) = begin
     map(a -> "$root/$a", files)
 end
 
-ff = map(find_file, walkdir("$home/$namespace/bin/center"))
+ff = map(find_file, walkdir("$home/$namespace/bin/testdir"))
 
 #strArr = reduce(append!, [], ff) |> println
 
@@ -51,3 +51,29 @@ res1 = reduce(reduce_class, [], map(find_class, res)) |> sort #|> println
 println("\nFound $(length(res1)) roles.")
 
 map(x -> println(x), res1)
+
+
+css = open(readall, "index.css")
+css_content = "a-z0-9\"\'"
+css_symbol = "#\\(\\)\\!π\\.%-:,;"
+css_comment = "\\*\\/"
+css_space = "\\n\\t\\s"
+cons_re(classname) = begin
+    role = "\\.$classname[:a-z,\\s]*.*\\s*"
+    content = "{[$css_content$css_symbol$css_comment$css_space]*}"
+    Regex("$role$content", "i")
+end 
+#res2 = map(x -> cons_re(x), res1)
+res2 = map(x -> match(cons_re(x), css, 1), res1)
+println("\n")
+map(x -> println(x), res2)
+
+concat_style(acc, curr) = begin
+    if curr != nothing
+        acc * curr.match * "\n\n"
+    else
+        acc
+    end
+end
+reduce(concat_style, "", res2) |> println
+
