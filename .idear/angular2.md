@@ -4,7 +4,7 @@
 
 不知道大家在2015年收获怎样呢，**react**是不是已经6到爆炸。仔细回想一下，确实变化也是翻天覆地，react，webpack，ember2，redux……
 
-2016，不如来看下*ng2*吧。
+2016，不如来看下**ng2**吧。
 
 # 这是又一本带大家入坑的小书
 
@@ -143,11 +143,61 @@ npm init
 </html>
 ```
 
-恩，直接复制就好了。开启服务：
+恩，直接复制就好了。接下来开启服务：
 
 ```sh
 npm start
 ```
 
+浏览器会自动打开`localhost:3000`，然后会显示`Loading...`。
+
 下面开始我们的第一个组件，就是`index.html`里面那个奇怪的`<my-app>Loading...</my-app>`
+
+# 他们都一样，没什么区别
+
+`<my-app>`是做什么的？我想你应该已经知道了，这是程序的根节点，我们写的全部东东都在这个标签下面。其他框架不也是这么做的么？想想
+
+```js
+ReactDOM.render(<app />, document.getElementById('id'))
+```
+
+和
+
+```js
+Ember.Application.create();
+```
+
+接下来就来实现我们的`Hello world`。
+
+先来创建我们的第一个组件，名字就是`AppComponent`。首先创建一个`app`文件夹，然后在里面新建文件`app.component.ts`。注意后缀名，我们要用的typescript。
+
+```typescript
+/* @file app/app.component.ts */
+import { Component } from 'angular2/core'
+
+const component = {
+  selector: 'my-app',
+  template: '<h1>Hello world</h1>'
+}
+
+@Component(component)
+export class AppComponent { }
+```
+
+好多新东西。上面一行是模块导入，我们需要`angular2/core`的`Component`来构建我们的组件；接下来定义了一个对象，`selector`就是之前看到的标签名字`my-app`，`templete`是要显示的内容；最下面导出了AppComponent组件，然后再上面一行`@Component`是一个注解，表示这是一个ng2的组件。当然啦，这只是一个语法糖，其实就是`Component(component)(AppComponent)`，那么写为了增加颜值，也更清除的看到这个组件的特性。后面还会遇到一些注解。
+
+有了AppComponent组件还不能看到效果，因为我们还木有启动（安装）他。
+
+新建一个`boot.ts`：
+
+```typescript
+/* @file app/boot.ts */
+import { bootstrap } from 'angular2/platform/browser'
+import { AppComponent } from './app.component'
+
+bootstrap(AppComponent)
+```
+
+这就是启动方式，不用说就可以看明白。保存片刻之后浏览器会自动刷新。Hello World完成:joy:。
+
 
