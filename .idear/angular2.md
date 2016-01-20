@@ -476,7 +476,7 @@ createUser(newUser: string): Promise<User> {
 
 很简单，只有短短一行。`id`的话就用时间截来代替吧，注意这里的类型签名。
 
-回到前边`app/user-list.component.ts`的`createUser()`，请求成功后，把当前的`users`替换为新的`users`，这里用到了`concat`函数。
+回到前边`app/user-list.component.ts`的`createUser()`，请求成功后，把当前的`users`替换为新的`users`，这里用到了`concat`函数：
 
 ```typescript
 [1, 2, 3].concat(4) //=> [1, 2, 3, 4]
@@ -494,7 +494,7 @@ createUser(): void {
 }
 ```
 
-为了增加用户体验，我想在输入完成后按回车就可以添加而不是去点击按钮，这要怎么做呢？也很简单，只需要简单修改下就好：
+为了增加用户体验，我想在输入完成后按回车就可以添加而不是去点击按钮，这要怎么做呢？也很简单，把之前的`<button>`删掉，只需要简单修改下输入框就好：
 
 ```typescript
 <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
@@ -503,3 +503,41 @@ createUser(): void {
 看吧，简直魔法一般。
 
 OK，接下来实现删除功能。同样的，先修改一些模板，这里只需要在每个`user`后面添加一个删除按钮就好：
+
+```typescript
+<li *ngFor="#user of users">
+  {{user.name}}
+  <button type="button" (click)="deleteUser(user)">删除</button>
+</li>
+```
+
+和之前如出一辙，那么接下来就要实现`deleteUser`这个方法，注意这里给这个方法传入一个参数，就是对应的`user`。先来实现service里面的deleteUser吧：
+
+```typescript
+/* @file app/user.service.ts */
+deleteUser(user: User): Promise<boolean> {
+  return Promise.resolve(true)
+}
+```
+
+仅仅返回了`true`，表示删除成功。然后添加组件的`deleteUser`：
+
+```typescript
+/* @file app/user-list.component.ts */
+deleteUser(user: User): void {
+  this._service.deleteUser().then(() => {
+    let idx = this.users.findIndex(userItem => userItem.id === user.id)
+    this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
+  })
+}
+```
+
+恩，这个也比较好理解，传入的参数就是前边提到的`user`，然后找到了`user`在`users`中的位置，用到了`findIndex`：
+
+```typescript
+[1, 2, 3].findIndex(n => n === 2) //=> 1
+```
+
+找到`index`就可以用`slice`函数将数组在`index`处切开，然后把前边和后边的片段用`concat`拼起来，这样就实现了删除。
+
+试一下功能，OK，木有问题。
