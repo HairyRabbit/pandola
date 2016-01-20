@@ -414,4 +414,92 @@ const component = {
 
 这样就可以了。接下来实现增加和删除功能。
 
+# 你不会走开的对不
 
+首先就让我们非常有诚意的添加输入框：
+
+```typescript
+template: `
+  <div>
+    <label>
+      添加新用户
+      <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" />
+    </label>
+    <button type="button">确定</button>
+    <p>要添加的用户为：{{newUser}}</p>
+  </div>
+		
+  <div *ngIf="getUserCount()">
+    <ul>
+      <li *ngFor="#user of users">
+      {{user.name}}
+      </li>
+    </ul>
+    <p>用户的数量是：{{getUserCount()}}</p>
+  </div>
+  <div *ngIf="!getUserCount()">
+    <p>木有用户(°Д°)</p>
+  </div>
+  `
+```
+
+对模板稍作修改，增加输入框和提交按钮，然后在下边显示即将添加的用户。除此之外，由于用到了`newUser`，所以要在组件里面声明这个属性，他的类型签名是`string`：
+
+```typescript
+newUser: string
+```
+
+在里面输入一些字试试看。Amazing！绑定果然很强大。接下来真正实现添加用户功能，这需要一个按钮的点击事件：
+
+```typescript
+<button type="text" (click)="createUser()">确定</button>
+```
+
+就像这样，很简单不是么。`createUser`就是事件要调取的方法，在组件里面实现他：
+
+```typescript
+/* @file app/user-list.component.ts */
+createUser(): void {
+  if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
+  this._service.createUser(this.newUser).then(user => this.users = this.users.concat(user))
+}
+```
+
+当然，`newUser`为空时并没什么卵用，不为空时，把他委托给`service`，就好像请求服务器那样：
+
+```typescript
+/* @file app/user.service.ts */
+createUser(newUser: string): Promise<User> {
+  return Promise.resolve({ id: +new Date(), name: newUser})
+}
+```
+
+很简单，只有短短一行。`id`的话就用时间截来代替吧，注意这里的类型签名。
+
+回到前边`app/user-list.component.ts`的`createUser()`，请求成功后，把当前的`users`替换为新的`users`，这里用到了`concat`函数。
+
+```typescript
+[1, 2, 3].concat(4) //=> [1, 2, 3, 4]
+```
+
+来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定。不过好像少写了一些东西。添加成功后，应该把`newUser`清空，这个简单：
+
+```typescript
+createUser(): void {
+  if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
+  this._service.createUser(this.newUser).then(user => {
+    this.users = this.users.concat(user)
+    this.newUser = '';
+  })
+}
+```
+
+为了增加用户体验，我想在输入完成后按回车就可以添加而不是去点击按钮，这要怎么做呢？也很简单，只需要简单修改下就好：
+
+```typescript
+<input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+```
+
+看吧，简直魔法一般。
+
+OK，接下来实现删除功能。同样的，先修改一些模板，这里只需要在每个`user`后面添加一个删除按钮就好：
