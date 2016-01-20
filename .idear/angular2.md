@@ -745,3 +745,56 @@ export class UserService {
 }
 ```
 
+# 当然，还有重要的东西没有说
+
+对于修改，我并不是很满意，原因是每个用户往往都有对应的详细页面来去做这些事情。这就要轮到路由出场了，来会会我们的老朋友吧。
+
+使用路由要进行一些麻烦的配置，那就从外往里修改好了，首先就是启动文件`app/boot.ts`：
+
+```typescript
+import { bootstrap } from 'angular2/platform/browser'
+import { AppComponent } from './app.component'
+import { ROUTER_PROVIDERS } from 'angular2/router'
+
+bootstrap(AppComponent, [ROUTER_PROVIDERS])
+```
+
+然后是`app/app.component.ts`：
+
+```typescript
+/* @file app/app.component.ts */
+import { Component } from 'angular2/core'
+import { RouteConfig, ROUTER_DIRECTIVES } from 'angular2/router'
+import { UserListComponent } from './user-list.component'
+import { UserService } from './user.service'
+
+const component = {
+  selector: 'my-app',
+  directives: [ROUTER_DIRECTIVES],
+  providers: [UserService],
+  template: `
+    <h1>Hello World</h1>
+    <router-outlet></router-outlet>
+  `
+}
+
+const router = [
+  { path: '/user-list', name: 'UserList', component: UserListComponent, useAsDefault: true }
+]
+
+@Component(component)
+@RouteConfig(router)
+export class AppComponent {}
+```
+
+接下来是熟悉的组件`app/user-list.component.ts`:
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Router } from 'angular2/router'
+
+constructor(private _service: UserService,
+            private _router: Router) {}
+```
+
+有点多，来依次看看吧。
