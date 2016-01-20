@@ -419,6 +419,7 @@ const component = {
 首先就让我们非常有诚意的添加输入框：
 
 ```typescript
+/* @file app/user-list.component.ts */
 template: `
   <div>
     <label>
@@ -446,12 +447,14 @@ template: `
 对模板稍作修改，增加输入框和提交按钮，然后在下边显示即将添加的用户。除此之外，由于用到了`newUser`，所以要在组件里面声明这个属性，他的类型签名是`string`：
 
 ```typescript
+/* @file app/user-list.component.ts */
 newUser: string
 ```
 
 在里面输入一些字试试看。Amazing！绑定果然很强大。接下来真正实现添加用户功能，这需要一个按钮的点击事件：
 
 ```typescript
+/* @file app/user-list.component.ts */
 <button type="text" (click)="createUser()">确定</button>
 ```
 
@@ -485,6 +488,7 @@ createUser(newUser: string): Promise<User> {
 来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定。不过好像少写了一些东西。添加成功后，应该把`newUser`清空，这个简单：
 
 ```typescript
+/* @file app/user-list.component.ts */
 createUser(): void {
   if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
   this._service.createUser(this.newUser).then(user => {
@@ -497,6 +501,7 @@ createUser(): void {
 为了增加用户体验，我想在输入完成后按回车就可以添加而不是去点击按钮，这要怎么做呢？也很简单，把之前的`<button>`删掉，只需要简单修改下输入框就好：
 
 ```typescript
+/* @file app/user-list.component.ts */
 <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
 ```
 
@@ -505,6 +510,7 @@ createUser(): void {
 OK，接下来实现删除功能。同样的，先修改一些模板，这里只需要在每个`user`后面添加一个删除按钮就好：
 
 ```typescript
+/* @file app/user-list.component.ts */
 <li *ngFor="#user of users">
   {{user.name}}
   <button type="button" (click)="deleteUser(user)">删除</button>
@@ -525,7 +531,7 @@ deleteUser(user: User): Promise<boolean> {
 ```typescript
 /* @file app/user-list.component.ts */
 deleteUser(user: User): void {
-  this._service.deleteUser().then(() => {
+  this._service.deleteUser(user).then(() => {
     let idx = this.users.findIndex(userItem => userItem.id === user.id)
     this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
   })
@@ -541,3 +547,200 @@ deleteUser(user: User): void {
 找到`index`就可以用`slice`函数将数组在`index`处切开，然后把前边和后边的片段用`concat`拼起来，这样就实现了删除。
 
 试一下功能，OK，木有问题。
+
+好吧，一鼓作气，来继续实现修改功能。还是先来愉快的修改模板：
+
+```typescript
+/* @file app/user-list.component.ts */
+<li *ngFor="#user of users">
+  <span *ngIf="!user.isEdit">{{user.name}}</span>
+  <input *ngIf="user.isEdit" [(ngModel)]="user.name" />
+  <button type="button" (click)="updateUser(user)">
+    <span *ngIf="!user.isEdit">修改</span>
+    <span *ngIf="user.isEdit">完成</span>
+  </button>
+  <button type="button" (click)="deleteUser(user)">删除</button>
+</li>
+```
+
+这里需要依赖`user`的`isEdit`属性，还木有怎么办。这有点棘手，需要修改一些地方。首先要修改一下新增方法`createUser`，在新增时给`user.isEdit`加一个默认值`false`：
+
+```typescript
+/* @file app/user.service.ts */
+createUser(newUser: string): Promise<User> {
+  return Promise.resolve({
+    id: +new Date(),
+    name: newUser,
+    isEdit: false
+  })
+}
+```
+
+现在看下控制台服务，糟糕，TypeScript报错了，说与`User`类型不符。当然，我们的`User`类型并没有`isEdit`，给他加一个：
+
+```typescript
+/* @file app/user.service.ts */
+export interface User {
+  id: number
+  name: string
+  isEdit: boolean
+}
+```
+
+解决了`User`的类型问题就可以继续实现`updateUser`了，还是老样子，先实现`service`的`updateUser`：
+
+```typescript
+/* @file app/user.service.ts */
+updateUser(user: User): Promise<boolean> {
+  return Promise.resolve(true)
+}
+```
+
+和`deleteUser`一样，只需简单的返回`true`就好了，接下来实现组件的`updateUser`：
+
+```typescript
+/* @file app/user-list.component.ts */
+updateUser(user: User): void {
+  let toggleEdit: () => void
+  toggleEdit = () => {
+    user.isEdit = !user.isEdit
+  }
+  
+  if(user.isEdit) {
+    this._service.updateUser(user).then(toggleEdit)
+  } else {
+    toggleEdit()
+  }
+}
+```
+
+`toggleEdit`用来切换`isEdit`的状态，然后在编辑时切换状态，编辑完成点击按钮时发送请求，之后切换状态。
+
+来试一下，没有问题。当然如果你愿意，可以把按钮的`updateUser`移到输入框中。
+
+现在为止，模板的内容已经很多了，是时候把他单独放在一个文件中。新建一个`app/user-list.component.html`，把`template`的内容复制在新文件中：
+
+```html
+<!-- @file app/user-list.component.html -->
+<div>
+  <label>
+    添加新用户
+    <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+  </label>
+  <p>要添加的用户为：{{newUser}}</p>
+</div>
+
+<div *ngIf="getUserCount()">
+  <ul>
+    <li *ngFor="#user of users">
+      <span *ngIf="!user.isEdit">{{user.name}}</span>
+      <input *ngIf="user.isEdit" [(ngModel)]="user.name" />
+      <button type="button" (click)="updateUser(user)">
+        <span *ngIf="!user.isEdit">修改</span>
+        <span *ngIf="user.isEdit">完成</span>
+      </button>
+      <button type="button" (click)="deleteUser(user)">删除</button>
+    </li>
+  </ul>
+  <p>用户的数量是：{{getUserCount()}}</p>
+</div>
+<div *ngIf="!getUserCount()">
+  <p>木有用户(°Д°)</p>
+</div>
+```
+
+之前的`template`不再需要了，改为：
+
+```typescript
+/* @file app/user-list.component.ts */
+templateUrl: 'app/user-list.component.html'
+```
+
+让我们再来看看两个重要文件`app/user-list.component.ts`和`app/user.service.ts`：
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { User, UserService } from './user.service'
+
+const component = {
+  selector: 'user-list',
+  templateUrl: 'app/user-list.component.html'
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+  constructor(private _service: UserService) {}
+
+  users: User[]
+  newUser: string
+
+  getUserCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+
+  createUser(): void {
+    if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
+    this._service.createUser(this.newUser).then(user => {
+      this.users = this.users.concat(user)
+      this.newUser = '';
+    })
+  }
+
+  deleteUser(user: User): void {
+    this._service.deleteUser(user).then(() => {
+      let idx = this.users.findIndex(userItem => userItem.id === user.id)
+      this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
+    })
+  }
+
+  updateUser(user: User): void {
+    let toggleEdit: () => void
+    toggleEdit = () => {
+      user.isEdit = !user.isEdit
+    }
+  
+    if(user.isEdit) {
+      this._service.updateUser(user).then(toggleEdit)
+    } else {
+      toggleEdit()
+    }
+  }
+		
+  ngOnInit(): void {
+    this._service.getUser().then(users => this.users = users)
+  }
+}
+```
+
+```typescript
+/* @file app/user.service.ts */
+import { Injectable } from 'angular2/core'
+
+export interface User {
+  id: number
+  name: string
+  isEdit: boolean
+}
+
+@Injectable()
+export class UserService {
+  getUser(): Promise<User[]> {
+    return Promise.resolve([])
+  }
+  createUser(newUser: string): Promise<User> {
+    return Promise.resolve({
+      id: +new Date(),
+      name: newUser,
+      isEdit: false
+    })
+  }
+  deleteUser(user: User): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+  updateUser(user: User): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+}
+```
