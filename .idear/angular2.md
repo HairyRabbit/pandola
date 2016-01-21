@@ -289,24 +289,24 @@ const component = {
 
 ```typescript
 template: `
-  <div *ngIf="getUserCount()">
+  <div *ngIf="getUsersCount()">
     <ul>
       <li *ngFor="#user of users">
         {{user.name}}
       </li>
     </ul>
-    <p>用户的数量是：{{getUserCount()}}</p>
+    <p>用户的数量是：{{getUsersCount()}}</p>
   </div>
-  <div *ngIf="!getUserCount()">
+  <div *ngIf="!getUsersCount()">
     <p>木有用户(°Д°)</p>
   </div>
 `
 ```
 
-在组件`UserListComponent`里添加一个`getUserCount`方法：
+在组件`UserListComponent`里添加一个`getUsersCount`方法：
 
 ```typescript
-getUserCount(): number {
+getUsersCount(): number {
   return this.users.length
 }
 ```
@@ -354,15 +354,15 @@ import { User, UserService } from './user.service'
 const component = {
   selector: 'user-list',
   template: `
-    <div *ngIf="getUserCount()">
+    <div *ngIf="getUsersCount()">
       <ul>
         <li *ngFor="#user of users">
         {{user.name}}
         </li>
       </ul>
-      <p>用户的数量是：{{getUserCount()}}</p>
+      <p>用户的数量是：{{getUsersCount()}}</p>
     </div>
-    <div *ngIf="!getUserCount()">
+    <div *ngIf="!getUsersCount()">
       <p>木有用户(°Д°)</p>
     </div>
   `
@@ -375,7 +375,7 @@ export class UserListComponent implements OnInit {
   
   users: User[]
 
-  getUserCount(): number {
+  getUsersCount(): number {
     if(!this.users) return 0
     return this.users.length
   }
@@ -392,7 +392,7 @@ export class UserListComponent implements OnInit {
 constructor(private _service: UserService) {}
 ```
 
-这里的`_service`就是`UserService`，`private`是访问修饰符表示私有。在`getUserCount`添加了空数组处理。而在`ngOnInit`钩子里，请求了`service`的方法，并用`Promise`的写法将数据赋给`this.users`，当然，他的值是`[]`。
+这里的`_service`就是`UserService`，`private`是访问修饰符表示私有。在`getUsersCount`添加了空数组处理。而在`ngOnInit`钩子里，请求了`service`的方法，并用`Promise`的写法将数据赋给`this.users`，当然，他的值是`[]`。
 
 悲剧的是，浏览器刷新后报错了，ng抱怨说没有提供`UserService`，为什么呢？
 
@@ -430,15 +430,15 @@ template: `
     <p>要添加的用户为：{{newUser}}</p>
   </div>
 		
-  <div *ngIf="getUserCount()">
+  <div *ngIf="getUsersCount()">
     <ul>
       <li *ngFor="#user of users">
       {{user.name}}
       </li>
     </ul>
-    <p>用户的数量是：{{getUserCount()}}</p>
+    <p>用户的数量是：{{getUsersCount()}}</p>
   </div>
-  <div *ngIf="!getUserCount()">
+  <div *ngIf="!getUsersCount()">
     <p>木有用户(°Д°)</p>
   </div>
   `
@@ -630,7 +630,7 @@ updateUser(user: User): void {
   <p>要添加的用户为：{{newUser}}</p>
 </div>
 
-<div *ngIf="getUserCount()">
+<div *ngIf="getUsersCount()">
   <ul>
     <li *ngFor="#user of users">
       <span *ngIf="!user.isEdit">{{user.name}}</span>
@@ -642,9 +642,9 @@ updateUser(user: User): void {
       <button type="button" (click)="deleteUser(user)">删除</button>
     </li>
   </ul>
-  <p>用户的数量是：{{getUserCount()}}</p>
+  <p>用户的数量是：{{getUsersCount()}}</p>
 </div>
-<div *ngIf="!getUserCount()">
+<div *ngIf="!getUsersCount()">
   <p>木有用户(°Д°)</p>
 </div>
 ```
@@ -675,7 +675,7 @@ export class UserListComponent implements OnInit {
   users: User[]
   newUser: string
 
-  getUserCount(): number {
+  getUsersCount(): number {
     if(!this.users) return 0
     return this.users.length
   }
@@ -829,12 +829,93 @@ const router = [
 
 接下来回归主题，配合路由，我要实现的功能是：
 
-* 访问`localhost:3000/user/1`时，表示访问`id`为`1`用户的详情；
+* 访问`localhost:3000/users/1`时，表示访问`id`为`1`用户的详情；
 * 在每个`user`后边加一个链接，跳转到对应的详情页；
-* 在详情页添加一个返回按钮，返回`user-list`，即用户列表
+* 在详情页添加一个返回按钮，返回`users`，即用户列表
 
 当然，目前为止还没有`user`详情的组件，那就来创建一个吧。新建`app/user-detail.component.ts`和`app/user-detail.component.html`。
 
 ```typescript
+/* @file app/user-detail.component.ts */
+import { Component } from 'angular2/core'
+import { Router } from 'angular2/router'
 
+const component = {
+  selector: 'user-detail',
+  templateUrl: 'app/user-detail.component.html'
+}
+
+@Component(component)
+export class UserDetailComponent {
+  constructor(private _router: Router) {}
+}
 ```
+
+```html
+<!-- @file app/user-detail.html -->
+<h2>User Detail</h2>
+```
+
+接下来就按照我们的计划，先来定义路由，那么还是在`app/app.component.ts`添加一条路由规则：
+
+```typescript
+/* @file app/app.component.ts */
+import { UserDetailComponent } from './user-detail.component'
+
+const router: RouteDefinition[] = [
+  { path: '/users', name: 'UserList', component: UserListComponent, useAsDefault: true },
+  { path: '/users/:id', name: 'UserDetail', component: UserDetailComponent }
+]
+```
+
+路由`path`中的`:id`表示动态段，就是说，这条路由可以匹配`/users/1`，也可以匹配`/users/666666`。当然，这里就不需要`useAsDefault`了。由于用到了组件`UserDetailComponent`，需要在开始处导入。
+
+接下来实现第二条，这需要修改我们的老朋友`app/user-list.component.html`：
+
+```html
+<!-- @file app/user-list.html -->
+<a *ngIf="!user.isEdit" [routerLink]="['UserDetail', {id: user.id}]">{{user.name}}</a>
+```
+
+这里只需要把之前的`<span>`标签改为`<a>`标签就好，需要注意的是`[routerLink]="['UserDetail', {id: user.id}]"`，这是干嘛的呢。我想你已经猜到了，这句就相当于`<a href="/users/:id">`，`UserDetail`我们在`app/app.component.ts`里面定义过，`{id: user.id}`的意思也很明了，就是把动态段`:id`的值赋予`user.id`。
+
+这样还不算完，用到`[routerLink]`要付出一点代价，那就是需要把他先引入组件中，修改`app/user-list.component.ts`：
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Router, ROUTER_DIRECTIVES } from 'angular2/router'
+
+const component = {
+  selector: 'user-list',
+  directives: [ROUTER_DIRECTIVES],
+  templateUrl: 'app/user-list.component.html'
+}
+```
+
+`directives`就是需要修改的地方，和最开始在`app/app.component.ts`需要用`<user-list>`时是一样的。
+
+还有最后要做的，就是添加一个返回链接。修改`app/user-detail.component.ts`：
+
+```html
+<!-- @file app/user-detail.html -->
+<a [routerLink]="['UserList']">返回</a>
+```
+
+这里又用到了`[routerLink]`，处理方式你应该也知道了：
+
+```typescript
+/* @file app/user-detail.component.ts */
+import { Router, ROUTER_DIRECTIVES } from 'angular2/router'
+
+const component = {
+  selector: 'user-detail',
+  directives: [ROUTER_DIRECTIVES],
+  templateUrl: 'app/user-detail.component.html'
+}
+```
+
+搞定，来试试看。可以来回跳转，但是，详细页的数据要怎么显示？
+
+# 这也许是个难点
+
+
