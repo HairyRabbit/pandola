@@ -1026,3 +1026,250 @@ export class UserDetailComponent implements OnInit {
 ```
 
 来试试我们的努力吧。
+
+最后来看下我们的所有文件吧，他们是：
+
+* index.html
+* app/boot.ts
+* app/app.component.ts
+* app/user-list.component.ts
+* app/user-list.component.html
+* app/user-detail.component.ts
+* app/user-detail.component.html
+* app/user.service.html
+
+```html
+<!-- @file index.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <base href="/">
+		
+    <title>Angular 2 QuickStart</title>
+    <link rel="stylesheet" href="styles/index.css" type="text/css" media="screen" />
+
+    <!-- 1. Load libraries -->
+    <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
+    <script src="node_modules/systemjs/dist/system.src.js"></script>
+    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
+    <script src="node_modules/angular2/bundles/router.dev.js"></script>
+		
+    <!-- 2. Configure SystemJS -->
+    <script>
+    System.config({
+      packages: {
+        app: {
+          format: 'register',
+          defaultExtension: 'js'
+        }
+      }
+    });
+    System.import('app/boot')
+      .then(null, console.error.bind(console));
+    </script>
+
+  </head>
+
+  <!-- 3. Display the application -->
+  <body>
+    <my-app>Loading...</my-app>
+  </body>
+
+</html>
+```
+
+```typescript
+/* @file app/boot.ts */
+import { bootstrap } from 'angular2/platform/browser'
+import { AppComponent } from './app.component'
+import { ROUTER_PROVIDERS } from 'angular2/router'
+
+bootstrap(AppComponent, [ROUTER_PROVIDERS])
+```
+
+```typescript
+/* @file app/app.component.ts */
+import { Component } from 'angular2/core'
+import { RouteConfig, ROUTER_DIRECTIVES, RouteDefinition } from 'angular2/router'
+import { UserListComponent } from './user-list.component'
+import { UserDetailComponent } from './user-detail.component'
+import { UserService } from './user.service'
+
+const component = {
+  selector: 'my-app',
+  directives: [ROUTER_DIRECTIVES],
+  providers: [UserService],
+  template: `
+    <h1>Hello World</h1>
+    <router-outlet></router-outlet>
+    `
+}
+
+const router: RouteDefinition[] = [
+  { path: '/users', name: 'UserList', component: UserListComponent, useAsDefault: true },
+  { path: '/users/:id', name: 'UserDetail', component: UserDetailComponent }
+]
+
+@Component(component)
+@RouteConfig(router)
+export class AppComponent {}
+```
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { Router, ROUTER_DIRECTIVES } from 'angular2/router'
+import { User, UserService } from './user.service'
+
+const component = {
+  selector: 'user-list',
+  directives: [ROUTER_DIRECTIVES],
+  templateUrl: 'app/user-list.component.html'
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+  constructor(private _service: UserService,
+              private _router: Router) {}
+		
+  users: User[]
+  newUser: string
+
+  getUsersCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+  createUser(): void {
+    if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
+    this._service.createUser(this.newUser)
+  }
+  deleteUser(user: User): void {
+    this._service.deleteUser(user).then(() => {
+      let idx = this.users.findIndex(userItem => userItem.id === user.id)
+      this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
+    })
+  }
+  updateUser(user: User): void {
+    let toggleEdit: () => void
+    toggleEdit = () => {
+      user.isEdit = !user.isEdit
+    }
+  
+    if(user.isEdit) {
+      this._service.updateUser(user).then(toggleEdit)
+    } else {
+      toggleEdit()
+    }
+  }
+  ngOnInit(): void {
+    this._service.getUsers().then(users => this.users = users)
+  }
+}
+```
+
+```html
+<!-- @file app/user-list.component.html -->
+<div>
+  <label>
+    添加新用户
+    <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+  </label>
+  <p>要添加的用户为：{{newUser}}</p>
+</div>
+
+<div *ngIf="getUsersCount()">
+  <ul>
+    <li *ngFor="#user of users">
+      <a *ngIf="!user.isEdit" [routerLink]="['UserDetail', {id: user.id}]">{{user.name}}</a>
+      <input *ngIf="user.isEdit" [(ngModel)]="user.name" />
+      <button type="button" (click)="updateUser(user)">
+        <span *ngIf="!user.isEdit">修改</span>
+        <span *ngIf="user.isEdit">完成</span>
+      </button>
+      <button type="button" (click)="deleteUser(user)">删除</button>
+    </li>
+  </ul>
+  <p>用户的数量是：{{getUsersCount()}}</p>
+</div>
+<div *ngIf="!getUsersCount()">
+  <p>木有用户(°Д°)</p>
+</div>
+```
+
+```typescript
+/* @file app/user-detail.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { Router, RouteParams, ROUTER_DIRECTIVES } from 'angular2/router'
+import { User, UserService } from './user.service'
+
+const component = {
+  selector: 'user-detail',
+  directives: [ROUTER_DIRECTIVES],
+  templateUrl: 'app/user-detail.component.html'
+}
+
+@Component(component)
+export class UserDetailComponent implements OnInit {
+  constructor(private _router: Router,
+              private _params: RouteParams,
+              private _service: UserService) {}
+
+  user: User
+
+  ngOnInit() {
+    let id = +this._params.get('id')
+    this._service.getUser(id).then(user => this.user = user)
+  }
+}
+```
+
+```html
+<!-- @file app/user-detail.html -->
+<h2>User Detail</h2>
+<a [routerLink]="['UserList']">返回</a>
+<div *ngIf="user">{{user.name}}</div>
+```
+
+```typescript
+/* @file app/user.service.ts */
+import { Injectable } from 'angular2/core'
+
+export interface User {
+  id: number
+  name: string
+  isEdit: boolean
+}
+
+@Injectable()
+export class UserService {
+  constructor() { this.users = [] }
+  
+  users: User[]
+  
+  getUsers(): Promise<User[]> {
+    return Promise.resolve(this.users)
+  }
+  getUser(id: number): Promise<User> {
+    let _user: User = this.users.find(user => user.id === id)
+    return Promise.resolve(_user)
+  }
+  createUser(newUser: string): Promise<boolean> {
+    let user: User = {
+      id: +new Date(),
+      name: newUser,
+      isEdit: false
+    }
+    this.users.push(user)
+    return Promise.resolve(true)
+  }
+  deleteUser(user: User): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+  updateUser(user: User): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+}
+```
+
+# 回归主题，新年快乐！
