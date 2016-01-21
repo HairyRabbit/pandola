@@ -778,7 +778,7 @@ const component = {
   `
 }
 
-const router = [
+const router: RouteDefinition = [
   { path: '/user-list', name: 'UserList', component: UserListComponent, useAsDefault: true }
 ]
 
@@ -797,4 +797,43 @@ constructor(private _service: UserService,
             private _router: Router) {}
 ```
 
-有点多，来依次看看吧。
+有点多，来依次看看。
+
+在`app/boot.ts`中，引入了`ROUTER_PROVIDERS`，用来将路由注入到组件中。而在`app/app.component.ts`引入了`RouteConfig`和`ROUTER_DIRECTIVES`。`RouteConfig`就是稍后看到的`@RouteConfig`注解，而`ROUTER_DIRECTIVES`是模板中的`<router-outlet>`，作用是占位符。接下来的：
+
+```typescript
+const router = [
+  { path: '/user-list', name: 'UserList', component: UserListComponent, useAsDefault: true }
+]
+```
+
+就是路由的定义了。路由定义和其他框架类似，`path`是必须的，代表了路径；`name`是名称；`component`是替代`<router-outlet>`的组件；`useAsDefault: true`则表示路由到根目录`/`时，默认采用这个组件。
+
+再来看看`app/user-list.component.ts`。更新的地方就是组件类的构造函数，多加了一个参数`private _router: Router`，他的签名是`Router`，已经在上边导入了。
+
+这时更新浏览器，报木有找到`angular2/router`。原因是`router`并没有在核心`core`中实现，需要另外引入，怎么做呢？只需要把脚本仍在`index.html`就好了：
+
+```html
+<!-- @file index.html -->
+<script src="node_modules/angular2/bundles/router.dev.js"></script>
+```
+
+当然，单页App还需要一个标签，那就是：
+
+```html
+<!-- @file index.html -->
+<base href="/">
+```
+
+现在等待浏览器刷新。路径会默认变为`localhost:3000/user-list`。
+
+接下来回归主题，配合路由，我要实现的功能是：
+
+* 访问`localhost:3000/user-list/1`时，表示访问`id`为`1`用户的详情；
+* 在每个`user`后边加一个链接，跳转到对应的详情页；
+* 在详情页添加一个返回按钮，返回`user-list`，即用户列表
+
+当然，目前为止还没有`user`详情的组件，那就来创建一个吧。新建`app/user-detail.component.ts`和`app/user-detail.component.html`。
+
+```typescript
+```
