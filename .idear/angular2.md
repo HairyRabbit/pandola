@@ -334,7 +334,7 @@ export interface User {
 
 @Injectable()
 export class UserService {
-  getUser(): Promise<User[]> {
+  getUsers(): Promise<User[]> {
     return Promise.resolve([])
   }
 }
@@ -342,7 +342,7 @@ export class UserService {
 
 快来看，我们遇到了第二个注解`@Injectable`。这个注解的作用是将service注入到其他依赖的地方，从名字就能看出端倪。
 
-然后还做了一些工作，把`app/user-list.component.ts`中的`User`接口移了过来，并用`export`导出。在UserService类中写了一个方法`getUser`，他返回一个`Promise`，用来模拟从服务器端请求数据，然后这个Promise返回了空列表`[]`。
+然后还做了一些工作，把`app/user-list.component.ts`中的`User`接口移了过来，并用`export`导出。在UserService类中写了一个方法`getUsers`，他返回一个`Promise`，用来模拟从服务器端请求数据，然后这个Promise返回了空列表`[]`。
 
 这样我们的`app/user-list.component.ts`要做一些改动了：
 
@@ -381,7 +381,7 @@ export class UserListComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    this._service.getUser().then(users => this.users = users)
+    this._service.getUsers().then(users => this.users = users)
   }
 }
 ```
@@ -709,7 +709,7 @@ export class UserListComponent implements OnInit {
   }
 		
   ngOnInit(): void {
-    this._service.getUser().then(users => this.users = users)
+    this._service.getUsers().then(users => this.users = users)
   }
 }
 ```
@@ -726,7 +726,7 @@ export interface User {
 
 @Injectable()
 export class UserService {
-  getUser(): Promise<User[]> {
+  getUsers(): Promise<User[]> {
     return Promise.resolve([])
   }
   createUser(newUser: string): Promise<User> {
@@ -779,7 +779,7 @@ const component = {
 }
 
 const router: RouteDefinition = [
-  { path: '/user-list', name: 'UserList', component: UserListComponent, useAsDefault: true }
+  { path: '/users', name: 'UserList', component: UserListComponent, useAsDefault: true }
 ]
 
 @Component(component)
@@ -825,15 +825,16 @@ const router = [
 <base href="/">
 ```
 
-现在等待浏览器刷新。路径会默认变为`localhost:3000/user-list`。
+现在等待浏览器刷新。路径会默认变为`localhost:3000/users`。
 
 接下来回归主题，配合路由，我要实现的功能是：
 
-* 访问`localhost:3000/user-list/1`时，表示访问`id`为`1`用户的详情；
+* 访问`localhost:3000/user/1`时，表示访问`id`为`1`用户的详情；
 * 在每个`user`后边加一个链接，跳转到对应的详情页；
 * 在详情页添加一个返回按钮，返回`user-list`，即用户列表
 
 当然，目前为止还没有`user`详情的组件，那就来创建一个吧。新建`app/user-detail.component.ts`和`app/user-detail.component.html`。
 
 ```typescript
+
 ```
