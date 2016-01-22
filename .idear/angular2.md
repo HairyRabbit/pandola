@@ -177,7 +177,7 @@ npm install --verbose
 
 同样的，现在不需要了解到每行的意思，不过依据命名应该能猜到一些端倪。
 
-然后在`index.html`中把刚才安装的依赖加好。
+然后在`index.html`中把刚才安装的依赖添加上去。
 
 ```html
 <!-- @file index.html -->
@@ -222,25 +222,31 @@ npm start
 
 浏览器会自动打开`localhost:3000`的地址，会显示`Loading...`:rabbit:。
 
-先喝杯java休息一下，别走开，紧接着开始我们的第一个组件，就是`index.html`里面那个奇怪的`<my-app>Loading...</my-app>`。
+先喝杯java休息一下，别走开，紧接着开始我们的第一个组件，就是那个奇怪的`<my-app>Loading...</my-app>`。
 
 # 他们都一样，没什么区别
 
-`<my-app>`是做什么的？我想你应该已经知道了，这是程序的根节点，我们写的全部东东都在这个标签下面。其他框架不也是这么做的么？想想
+`<my-app>`这个标签是做什么的，貌似重来没有见过？我不说，你也应该已经知道了，这是程序的根节点，我们写的全部内容都会塞在这个标签下。来回忆一下，其他框架的是怎么做的？
+
+react:
 
 ```js
 ReactDOM.render(<app />, document.getElementById('my-app'))
 ```
 
-和
+emberjs:
 
 ```js
-Ember.Application.create();
+Ember.Application.create({
+  rootElement: '#my-app'
+});
 ```
 
-接下来就来实现我们的`Hello World`。
+你懂的。
 
-先来创建我们的第一个组件`AppComponent`。首先创建一个`app`文件夹，然后在里面新建文件`app/app.component.ts`。注意后缀名，我们要用的**TypeScript**。
+接下来就来实现`Hello World`。
+
+创建第一个组件`AppComponent`。首先新建一个`app`文件夹，然后在里面新建文件`app/app.component.ts`，注意后缀名是`ts`。ng2文件的命名规范是`$name.component.ts`，之后会看到其他的文件也都是这样的命名范式。
 
 ```typescript
 /* @file app/app.component.ts */
@@ -255,9 +261,49 @@ const component = {
 export class AppComponent { }
 ```
 
-好多新东西。上面一行是模块导入，我们需要`angular2/core`的`Component`来构建我们的组件；接下来定义了一个对象，`selector`就是之前看到的标签名字`my-app`，`templete`是要显示的内容；最下面导出了AppComponent组件，然后再上面一行`@Component`是一个注解，表示这是一个ng2的组件。当然啦，这只是一个语法糖，其实就是`Component(component)(AppComponent)`，那么写可以增加颜值，也更清楚的看到这个组件的特性。后面还会遇到一些注解。
+好多新东西，并且完全没有js的样子。没关系，理解起来却很简单。
 
-有了AppComponent组件还不能看到效果，因为还木有启动（安装）。
+`import`和`export`是es6模块的用法，表示导入和导出。最上面从`angular2/core`中导入了`Component`，最下面导出了一个类`AppComponent`，也就是组件。
+
+`class`也是es6的新语法，用来表示一个类。如果你熟悉下面的写法：
+
+```js
+function Foo(bar) {
+  this.bar = bar
+}
+var foo = new Foo()
+```
+
+`class`就是上面这段代码的语法糖。当然，这么说也不正确，因为class所做的事远远不止如此。
+
+```js
+class Foo {
+  constructor(bar) { this.bar = bar }
+}
+var foo = new Foo()
+```
+
+`const`是绑定，和`var`类似，不过`const`定义的是常量，不能重复定义。否则下面的代码会报错：
+
+```js
+const PI = 3.1415
+const PI = 0.618 //=> Error!
+```
+
+这里的`const`绑定了一个对象`component`：
+
+```js
+const component = {
+  selector: 'my-app',
+  template: '<h1>Hello World</h1>'
+}
+```
+
+`selector`就是本节开始时看到的标签`my-app`，他用来定义标签的名字；`template`就是要显示的内容，称做模板。
+
+我猜你会第一眼看到`@Component`，他太特别了。这是一个注解，如果熟悉java，一定不会陌生，然而这里的注解很简单，他也是一个语法糖。`@Component`可以简单理解为`Component(component)(AppComponent)`，一个函数的调用。当然，这里理解为**AppComponent是一个ng2组件显然更好**，除了增加颜值，还能直观的看到组件类的特性。之后也会遇到一些其他注解。
+
+有了AppComponent组件还不能马上看到效果，因为还没有启动（安装）。
 
 新建一个`app/boot.ts`：
 
@@ -269,9 +315,9 @@ import { AppComponent } from './app.component'
 bootstrap(AppComponent)
 ```
 
-这就是启动方式，不用说可以明白。保存片刻之后浏览器会自动刷新。Hello World完成:joy:。
+这就是启动方式，现在可以不用理解`bootstrap`到底做了什么。保存片刻之后浏览器自动刷新，会看到大大的**Hello World**:joy:。
 
-接下来看下强大的模板功能。
+接下来摆弄一下强大的模板。
 
 # 没错，模板就是最强大的
 
