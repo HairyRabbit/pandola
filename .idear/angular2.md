@@ -1,10 +1,10 @@
 # 那么首先，祝大家新年快乐
 
-哦哈呦，那么首先，_Happy 2016 evenyone_。
+哦哈呦，那么首先，_Happy 2016 evenyone_:tada:。
 
 我是来给大家拜年的:raising_hand:。
 
-2015年大家玩的还好么？**react**是不是已经6到爆炸，**webpack**是不是已经驯服。仔细回想一下，确实变化也是翻天覆地，react，webpack，ember2，redux……真的是超多东西。
+2015年大家玩的还好么？**react**是不是已经6到爆炸，**webpack**是不是已经成功拿下。仔细回想一下，确实变化也是翻天覆地，[react](https://github.com/facebook/react)，[webpack](https://github.com/webpack/webpack)，[ember2](https://github.com/emberjs/ember.js)，[redux](https://github.com/rackt/redux)……真的是超多东西。
 
 之前的圣诞元旦腊八节也没有送大家礼物，在苦思冥想之后，我决定送大家这个。
 
@@ -14,11 +14,13 @@
 
 # 写在之前，这是又一本坑大家的小书
 
-ng的话我想大家已经都相当熟悉了，就算没有真正玩过，也会天天听到这个词，简直烦到不能。这个mvvm框架是目前使用人数最多的mv*框架。恩，当然，这次我们的主角并不是ng，而是**ng2**。
+[angular](https://github.com/angular/angular.js)我想大家已经都相当熟悉了，就算没有真正玩过，也会天天听到这个词，简直烦到不能。这个mvvm框架是目前使用人数最多的mv(x)框架。恩，当然，这次我们的主角并不是ng，而是[angular2](https://github.com/angular/angular)。
 
-这既不是一本比较不同的书，也不是一本很权威的文档，我呢，只是希望大家很简单的把ng2玩起来，真的很简单。
+这既不是一本比较ng1与ng2区别的书，也不是一本很权威的文档，相反，是一个相当随意的文章。只是希望大家很简单的把ng2玩起来，试过之后你会发现，真的很简单。:joy:
 
-首先要有一些提前知道的东东，那就是**TypeScript**。说的简单一些，这就是一个带类型版本的JavaScript。除了提升逼格外，他还能帮助你检查类型问题，当然，也会约束你，写错类型的话会提示你。然后呢，他还支持一些es6新语法。ng2中用的比较多的是`import``export`，`class`，模板字符串和注解，我们会在之后看到这些。
+在开始之前还需要做一些准备活动。首先有一个东西必须要提，那就是[TypeScript](https://github.com/Microsoft/TypeScript)。一句话介绍，TypeScript是一个带类型版本的JavaScript。当然功能不至于次，除了提升逼格外，还能提高颜值。
+
+TypeScript可以帮助你检查类型问题，告别_TypeError_，约束你写出正确匹配的类型，否则会在控制台抱怨不止。然后呢，他还支持一些es6新语法。ng2中用的比较多的是`import``export`，`class`，模板字符串和注解，我们会在之后看到这些。
 
 Ts就像sass一样，只不过他把`.ts`文件编译为普通的`.js`文件。怎么用？之后就会看到。
 
