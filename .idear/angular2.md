@@ -85,15 +85,9 @@ npm init
 | lite-server      | 一个静态文件服务器            |
 | concurrently     | 可以一次执行多个脚本          |
 
-完成之后修改一下生成的`package.json`，加入下面的依赖项和脚本：
+不要被这么多东西吓到，因为现在并不需要完全掌握他们，只要保证他们在就没问题。接下来修改一下`package.json`，把上面的依赖添加进去：
 
 ```js
-"scripts": {
-  "tsc": "tsc",
-  "tsc:w": "tsc -w",
-  "lite": "lite-server",
-  "start": "concurrent \"npm run tsc:w\" \"npm run lite\" "
-},
 "devDependencies": {
   "angular2": "^2.0.0-beta.1",
   "concurrently": "^1.0.0",
@@ -108,15 +102,60 @@ npm init
 }
 ```
 
-搞定后就可以安装依赖了：
+直接复制就好。然后还有一些启动脚本：
 
-```sh
-npm init
+```js
+"scripts": {
+  "tsc": "tsc",
+  "tsc:w": "tsc -w",
+  "lite": "lite-server",
+  "start": "concurrent \"npm run tsc:w\" \"npm run lite\" "
+}
 ```
 
-注意那些版本号，如果版本号不对，npm会提示你，所以说如果出错了就好好看下日志。
+同样复制就可以了。现在我的`package.json`长这个样子：
 
-还有一个配置文件，用来配置`typescript`，给他取名为`tsconfig.json`就好：
+```js
+{
+  "name": "angular2-start",
+  "version": "1.0.0",
+  "description": "Hello ng2.",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "lite": "lite-server",
+    "start": "concurrent \"npm run tsc:w\" \"npm run lite\" "
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "angular2": "^2.0.0-beta.1",
+    "concurrently": "^1.0.0",
+    "es6-promise": "^3.0.2",
+    "es6-shim": "^0.33.3",
+    "lite-server": "^1.3.2",
+    "node-uuid": "^1.4.7",
+    "reflect-metadata": "^0.1.2",
+    "rxjs": "^5.0.0-beta.0",
+    "systemjs": "^0.19.14",
+    "typescript": "^1.7.5",
+    "zone.js": "^0.5.10"
+  }
+}
+```
+接下来通过下面的命令安装依赖：
+
+```sh
+npm install --verbose
+```
+
+命令行会起飞。
+
+要注意那些版本号，因为ng2需求一些依赖的版本号可能不是最新，所以如果版本号不对，npm就会在命令行提醒你。出错了就检查下日志，这里还是建议直接复制过去安装比较好。
+
+稍等片刻npm就会把所需的依赖安装好。
+
+对了，还有一个配置文件，是用来配置ts的，取名为`tsconfig.json`：
 
 ```js
 {
@@ -136,21 +175,24 @@ npm init
 }
 ```
 
-然后在我们的`index.html`里面把ng2的依赖加好。
+同样的，现在不需要了解到每行的意思，不过依据命名应该能猜到一些端倪。
+
+然后在`index.html`中把刚才安装的依赖加好。
 
 ```html
+<!-- @file index.html -->
 <!DOCTYPE html>
 <html>
   <head>
-    <base href="/">
-    <title>Angular 2</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hello World, Angular 2</title>
 
     <!-- 1. Load libraries -->
     <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
     <script src="node_modules/systemjs/dist/system.src.js"></script>
     <script src="node_modules/rxjs/bundles/Rx.js"></script>
     <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
-    <script src="node_modules/angular2/bundles/router.dev.js"></script>
 		
     <!-- 2. Configure SystemJS -->		
     <script>
@@ -172,15 +214,15 @@ npm init
 </html>
 ```
 
-恩，直接复制就好了。接下来开启服务：
+同样的，直接复制就好。接下来启动服务：
 
 ```sh
 npm start
 ```
 
-浏览器会自动打开`localhost:3000`，然后会显示`Loading...`。
+浏览器会自动打开`localhost:3000`的地址，会显示`Loading...`:rabbit:。
 
-下面开始我们的第一个组件，就是`index.html`里面那个奇怪的`<my-app>Loading...</my-app>`
+先喝杯java休息一下，别走开，紧接着开始我们的第一个组件，就是`index.html`里面那个奇怪的`<my-app>Loading...</my-app>`。
 
 # 他们都一样，没什么区别
 
