@@ -4,66 +4,88 @@
 
 我是来给大家拜年的:raising_hand:。
 
-2015年大家玩的还好么？**react**是不是已经6到爆炸，**webpack**是不是已经成功拿下。仔细回想一下，确实变化也是翻天覆地，[react](https://github.com/facebook/react)，[webpack](https://github.com/webpack/webpack)，[ember2](https://github.com/emberjs/ember.js)，[redux](https://github.com/rackt/redux)……真的是超多东西。
+2015年大家玩的怎样？**react**是不是已经6到爆炸，**webpack**是不是已经轻松拿下。仔细回想一下，前端变化也算是翻天覆地的，[react](https://github.com/facebook/react)，[webpack](https://github.com/webpack/webpack)，[ember2](https://github.com/emberjs/ember.js)，[redux](https://github.com/rackt/redux)……真是超多东西需要学习。
 
-之前的圣诞元旦腊八节也没有送大家礼物，在苦思冥想之后，我决定送大家这个。
+之前的圣诞元旦腊八节也没有送大家礼物，在苦思冥想之后，我决定为大家送上这个。
 
-没错，我又来带大家踩坑了。
+没错，这次又来带大家踩坑了。
 
 2016，不如来看下**ng2**吧。
 
-# 写在之前，这是又一本坑大家的小书
+# 写在之前，Coffee Or Tea？
 
 [angular](https://github.com/angular/angular.js)我想大家已经都相当熟悉了，就算没有真正玩过，也会天天听到这个词，简直烦到不能。这个mvvm框架是目前使用人数最多的mv(x)框架。恩，当然，这次我们的主角并不是ng，而是[angular2](https://github.com/angular/angular)。
 
 这既不是一本比较ng1与ng2区别的书，也不是一本很权威的文档，相反，是一个相当随意的文章。只是希望大家很简单的把ng2玩起来，试过之后你会发现，真的很简单。:joy:
 
-在开始之前还需要做一些准备活动。首先有一个东西必须要提，那就是[TypeScript](https://github.com/Microsoft/TypeScript)。一句话介绍，TypeScript是一个带类型版本的JavaScript。当然功能不至于次，除了提升逼格外，还能提高颜值。
+在开始之前需要做一些准备活动。那么首先，有一个东西一定要提，那就是[TypeScript](https://github.com/Microsoft/TypeScript)。一句话简单介绍，TypeScript是一个带**类型**版本的JavaScript。当然，他的功能不至于次，除了提升逼格外，还能提高颜值。
 
-TypeScript可以帮助你检查类型问题，告别_TypeError_，约束你写出正确匹配的类型，否则会在控制台抱怨不止。然后呢，他还支持一些es6新语法。ng2中用的比较多的是`import``export`，`class`，模板字符串和注解，我们会在之后看到这些。
+TypeScript（以下简称**ts**）可以帮助你检查类型问题，告别**TypeError**；约束你写出正确的类型，否则编译器就会抱怨不止。然后，他还支持一堆es6（es2015）的新语法。常用的包括模块，类，箭头函数，绑定，模板字符串等等，除了这些，ts还有es7的注解功能，稍后就会看到。
 
-Ts就像sass一样，只不过他把`.ts`文件编译为普通的`.js`文件。怎么用？之后就会看到。
+如果你玩过sass，就应该知道sass是把sass文件编译为css文件。在这一点上ts就像sass一样，他的文件后缀名为`.ts`，编译后就是普通的`.js`文件。
 
-然而知道ts之后我们还需要准备一些环境，没错，**nodejs**。如果你在抱怨为什么哪里都有他，那就out啦。
+想快速浏览ts的内容可以先跳到附录。
 
-nodejs安装很简单，在官网上下载好一直下一步就可以装好。对了，建议装5.X版本。
+ts之后就是我们的老朋友了，没错，他是[nodejs](http://nodejs.org)。你一定在抱怨为什么哪里都有他，但这是必须的。
 
-有了node我们就可以愉快的开始了。接下来首先配置一个简单的环境，然后依次熟悉各部分，包括：
+nodejs安装很简单，在官网上下载好一路*next*下去就可以装好。对了，建议装5.X版本。
 
-* 启动
+nodejs准备好后，就可以愉快的开始了。接下来的任务首先要配置一个简单的ng环境，然后依次熟悉ng各部分，包括但不限于：
+
+* 环境与启动文件
 * 组件
 * 模板与绑定
-* 服务
-* 路由
+* 服务与依赖注入
+* 路由模块
 
-# 准备活动，先来index.html
+我将用一个简单的demo来刻画这些内容。:ghost:
 
-前端嘛，肯定少不了这个文件：
+# 准备活动是必不可少的
+
+第一个文件，`index.html`，你应该最熟悉不过：
 
 ```html
+<!-- @file index.html -->
 <!DOCTYPE html>
 <html>
   <head>
-    <base href="/">
-    <title>Angular 2</title>
-
-    <!-- 1. script libs -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hello World, Angular 2</title>
   </head>
   <body>
+    <!-- Application root container. -->
     <my-app>Loading...</my-app>
   </body>
 </html>
 ```
 
-什么都没有，注释的地方就是我们稍后要做的，在那里加一些依赖。
+除了那条注释外，不能在更简单了。
 
-现在我们用npm先来生成一个配置文件：
+接下来用npm来生成一个配置文件`package.json`，这个文件保存着项目里用到的依赖。执行：
 
 ```sh
 npm init
 ```
 
-喜欢添就添一些内容。完成之后修改一下生成的`package.json`，加入下面的依赖项和脚本：
+会看到node问你一大堆问题，名称、版本号什么的，括号部分就是默认值，这里不想麻烦就一路回车吧，喜欢添就添一些内容。
+
+需要的依赖包括这些东西：
+
+| 依赖              | 说明                       |
+| :-------------   | :------------------------ |
+| typescript       | 不解释                     |
+| angular2         | 同上                       |
+| rxjs             | FPR库，ng2需要他            |
+| es6-shim         | 一个es6的垫片，用来兼容不同环境 |
+| es6-promise      | Promise，用来处理异步任务     |
+| reflect-metadata | 提供es7注解语法支持           |
+| zone.js          | 用来脏值检查                 |
+| systemjs         | 脚本加载器                   |
+| lite-server      | 一个静态文件服务器            |
+| concurrently     | 可以一次执行多个脚本          |
+
+完成之后修改一下生成的`package.json`，加入下面的依赖项和脚本：
 
 ```js
 "scripts": {
@@ -78,7 +100,6 @@ npm init
   "es6-promise": "^3.0.2",
   "es6-shim": "^0.33.3",
   "lite-server": "^1.3.2",
-  "node-uuid": "^1.4.7",
   "reflect-metadata": "^0.1.2",
   "rxjs": "^5.0.0-beta.0",
   "systemjs": "^0.19.14",
