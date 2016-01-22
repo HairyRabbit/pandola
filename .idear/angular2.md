@@ -226,7 +226,7 @@ npm start
 
 # 他们都一样，没什么区别
 
-`<my-app>`这个标签是做什么的，貌似重来没有见过？我不说，你也应该已经知道了，这是程序的根节点，我们写的全部内容都会塞在这个标签下。来回忆一下，其他框架的是怎么做的？
+`<my-app>`这个标签是做什么的，貌似重来没有见过？我不说，你也应该猜到一些，他是程序的根节点，我们写的全部内容都会塞在这个标签下。来回忆一下，其他框架的是怎么做的？
 
 react:
 
@@ -261,7 +261,7 @@ const component = {
 export class AppComponent { }
 ```
 
-好多新东西，并且完全没有js的样子。没关系，理解起来却很简单。
+好多新东西，并且完全没有js的样子。没关系，理解起来很简单。
 
 `import`和`export`是es6模块的用法，表示导入和导出。最上面从`angular2/core`中导入了`Component`，最下面导出了一个类`AppComponent`，也就是组件。
 
@@ -1398,3 +1398,118 @@ export class UserService {
 那么，新年快乐(｡◕‿◕｡)
 
 See you again.:two_hearts:
+
+# 附录，TypeScript 101
+
+前面已经介绍了一些，至少你知道了ts是类型版js，那么带着这个理解开始我们的ts之旅。
+
+## 基本类型
+
+最好的解释就是直接看实例。首先是简单的基本类型，包括字符串、数字、布尔值：
+
+```typescript
+let foo: number = 42
+let bar: string = 'hello world'
+let bar: boolean = true
+```
+
+变量的类型用`var: type`来表示。
+
+接下来是稍复杂一些的，数组：
+
+```typescript
+let list1: number[] = [1, 2, 3]
+let list2: Array<string> = ['foo', 'bar', 'baz']
+```
+
+他有两种表示方式：
+
+1. type加[]，如number[]；
+2. Array<type>的形式
+
+然后是枚举Enum，这有些不太一样：
+
+```typescript
+enum Color = {
+	red,
+	green,
+	blue
+}
+
+let color = Color.red
+```
+
+枚举的默认值从0开始，也就是说`Color.red`的值为0，当然也可以给他赋一个数字，就像这样：
+
+```typescript
+enum Color = {red = 1}
+```
+
+这之后是一个很有意思的类型，他表示任意类型，用`Any`表示：
+
+```typescript
+let foo: any = 42
+let foo = 'bar' // 没问题
+let foo = true // 没问题
+```
+
+最后一个基本类型是`void`他表示不返回东西，通常用在函数上：
+
+```typescript
+function addClass(): void {
+	$el.addClass('active')
+}
+```
+
+## 接口类型
+
+有些时候想要定义一些我们自己的类型，`Interfaces`会派上用场。
+
+比如我像定义一个圆，他由原点和半径组成，而原点又由x，y两个数字组成的坐标表示：
+
+```typescript
+interface Point {
+	x: number
+	y: number
+}
+interface Circle {
+	point: Point
+	radius: number
+}
+```
+
+Point和Circle就是新定义的类型：
+
+```typescript
+let circle: Circle = {
+  point: {
+    x: 0,
+    y: 0
+  },
+  radius: 10
+}
+```
+
+当然，有些类型可能不是必须的，可以在属性后边加`?`表示这个属性可选：
+
+```typescript
+interface Point {
+  x: number
+  y: number
+  color?: string
+}
+```
+
+在js中函数也是类型，他可以赋给变量，所以在Interface中也可以有函数的表示：
+
+```typescript
+interface toUpperCaseFunc {
+  (str: string): string
+}
+
+let toUpperCase: toUpperCaseFunc = function(str) {
+  return str.toUpperCase()
+}
+```
+
+这是一个把字符串变成大写的函数，Interface里括号中的内容是参数和他的类型，后边部分是返回值的类型。
