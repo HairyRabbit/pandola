@@ -389,7 +389,7 @@ interface User {
 }
 ```
 
-这是我们自定义的接口，而`OnInit`是ng2定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必要要求包括这两个属性。再来看看最后几行代码：
+这是我们自定义的接口，而`OnInit`是ng2定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必须要求包括这两个属性。再来看看最后几行代码：
 
 ```typescript
 const USERS: User[] = [
@@ -399,9 +399,9 @@ const USERS: User[] = [
 ]
 ```
 
-这里定义了一些静态测试数据，注意他的类型签名，是`User[]`，他表示`USERS`是一个`User`数组。显然他的数据格式必须包括`id`和`name`，否则编译器就会报错。
+这里定义了一些静态测试数据，注意他的类型签名，是`User[]`，他表示`USERS`是一个`User`数组。显然他的数据格式已经包括了`id`和`name`，否则编译器会报错。
 
-当然，除了显眼的`Interface`外，还有一样东西也格外引人入目，那就是template，也是本节的主角，模板。
+当然，除了显眼的`Interface`外，还有一样东西也格外引人入目，那就是`template`，也是本节的主角，模板。
 
 ```typescript
 const component = {
@@ -416,7 +416,7 @@ const component = {
 }
 ```
 
-`*ngFor`，从名字可以揣测出他的作用。没错，他用来循环列表，而后面的`#user of users`则可译为："users中的每一项用user代替"。而`{{user.name}}`不必多说你也应该清楚。这里取的是每个`user`的`name`。回忆一下其他框架中是怎么做的：
+`*ngFor`，从名字可以揣测出他的用途。没错，他用来循环列表，而后面的`#user of users`则可译为："users中的每一项用user表示"。而`{{user.name}}`不必多说你也已经清楚了。这里取的是每个`user`的`name`属性。回忆一下其他框架中是怎么做的：
 
 react:
 
@@ -442,7 +442,7 @@ emberjs:
 
 `selector: user-list`之前已经解释过，稍后就会看到他的用处。
 
-这里还有一个很有意思的es6特性，那就是模板字符串**Template String**。与普通字符串不同，他用**`**把内容括起来，当然他有一个很厉害的功能：
+这里还有一个很有意思的es6特性，那就是模板字符串**Template String**。与普通字符串不同，他用 **`** 符号把内容括起来，当然还有一个更厉害的功能：
 
 ```js
 var test = 'test'
@@ -454,9 +454,10 @@ var newStr = `this is ${test} template string`
 
 还有重要的一点没有说，模板里的`users`是从哪里来的？你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
 
-然后要做的工作就是把这个组件塞到之前的`AppComponent`的组件里面：
+接下来要做的工作就是把这个组件塞到之前的`app/app.component.ts`的`template`里：
 
 ```typescript
+/* @file app/app.component.ts */
 import { UserListComponent } from './user-list.component'
 
 const component = {
@@ -467,13 +468,17 @@ const component = {
     <user-list></user-list>
   `
 }
+
+//...
 ```
 
-要想使用`<user-list>`，必须先用import将他导进来，然后声明`directives: [UserListComponent]`。之后也是这样，要想使用我们自定义的组件，这两步是必须的。
+首先在页面顶部先把组件用`import`导入。
 
-来看下效果吧，页面应该刷新好了。
+ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`directives`的值是一个数组，里面存放我们的组件。
 
-接下来再来看一些模板。
+这里要思考的一点是，ng2的组件其实就是一个`directive`。
+
+接下来看下效果吧，页面应该早就刷新好了。
 
 # 太简单了，老板再来一些模板
 
