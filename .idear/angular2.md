@@ -218,7 +218,7 @@ npm install --verbose
 直接复制就好。接下来启动服务：
 
 ```sh
-npm start
+npm run start
 ```
 
 浏览器会自动打开`localhost:3000`的地址，会显示`Loading...`:rabbit:。
@@ -320,11 +320,13 @@ bootstrap(AppComponent)
 
 接下来摆弄一下强大的模板。
 
-# 没错，模板就是最强大的
+# 没错，模板最大
 
-展示模板的最好方法就是弄一个列表出来，然后再花样显示上去。
+展示模板的最好方法就是做一个列表，然后再花样显示上去。
 
-Hello World就留着好了。再来新建一个组件`UserListComponent`，新建文件`app/user-list.component.ts`
+Hello World就留在那里。实现一个用来显示用户姓名的列表。
+
+那么再来新建一个组件，我想给他取名`UserListComponent`很合适。新建文件`app/user-list.component.ts`。之前在命名`app/app.component.ts`时说到了命名规范，这里再加一条，词组的话用`-`来连接每个单词，就像上面那样：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -351,34 +353,106 @@ export class UserListComponent implements OnInit {
   users: User[]
   
   ngOnInit() {
-    this.users = users || []
+    if(!USERS) return
+    this.users = USERS
   }
 }
 
-const users: User[] = [
+const USERS: User[] = [
   { id: 1, name: 'aaa' },
   { id: 2, name: 'bbb' },
   { id: 3, name: 'ccc' }
 ]
 ```
 
-额，这次有点多。总之还是从上之下来看吧。首先除了`Component`还引入了`OnInit`这是个接口。什么？JS也有接口？是的，TS有，这个接口表示要实现我们自定义的初始化方法，稍后会看到。
+这次出来了新东西，`interface`。解释之前还是先从上到下看一下代码内容。与`app/app.component.ts`不同，第一行除了导入`Component`外，还导入了`OnInit`，这是一个接口，也就是`interface`。
 
-然后我们自己定义了一个接口……好吧，我感觉你已经晕了。那这个是用来做什么的呢？我们知道JS是没有类型一说，而TS就是要解决这个问题，而这里的`interface User`就是我们自定义的类型，他的类型为`User`。这里简单定义了两个属性，`id`和`name`。
+`interface`接口是ts中对js的扩展，如果有其他oop编程经验那么肯定不会对他陌生。接口可以表现为对行为的一种约束，就是说如果"xxx实现了某种接口，那么xxx必然具备这个接口的所有内容"。看一下这行代码：
 
-接下来要轻松一些，是之前见到过的东西`component`。`template`有些特别，这里不再是字符串，而是用了es6中模板字符串。模板字符串用```表示，他除了可以多行显示外，还可以将变量插入到字符串中，来代替之前的用`+`拼接字符串：
+```typescript
+export class UserListComponent implements OnInit {
+  //...
+  ngOnInit() {
+    //...
+  }
+}
+```
+
+这句话可以翻译为实现了`OnInit`接口的`UserListComponent`类。既然要实现这个接口，必然也要实现接口里面的内容，那就是`ngOnInit`方法。这个方法会在初始化该类时调用。
+
+如果感觉很抽象，再看看这个会好一些：
+
+```typescript
+interface User {
+  id: number
+  name: string
+}
+```
+
+这是我们自定义的接口，而`OnInit`是ng2定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必要要求包括这两个属性。再来看看最后几行代码：
+
+```typescript
+const USERS: User[] = [
+  { id: 1, name: 'aaa' },
+  { id: 2, name: 'bbb' },
+  { id: 3, name: 'ccc' }
+]
+```
+
+这里定义了一些静态测试数据，注意他的类型签名，是`User[]`，他表示`USERS`是一个`User`数组。显然他的数据格式必须包括`id`和`name`，否则编译器就会报错。
+
+当然，除了显眼的`Interface`外，还有一样东西也格外引人入目，那就是template，也是本节的主角，模板。
+
+```typescript
+const component = {
+  selector: 'user-list',
+  template: `
+    <ul>
+      <li *ngFor="#user of users">
+      {{user.name}}
+      </li>
+    </ul>
+  `
+}
+```
+
+`*ngFor`，从名字可以揣测出他的作用。没错，他用来循环列表，而后面的`#user of users`则可译为："users中的每一项用user代替"。而`{{user.name}}`不必多说你也应该清楚。这里取的是每个`user`的`name`。回忆一下其他框架中是怎么做的：
+
+react:
+
+```jsx
+<ul>
+  {
+    this.props.users.map(user => {
+		return <li>{user.name}</li>
+	})
+  }
+</ul>
+```
+
+emberjs:
+
+```hbs
+<ul>
+{{#each user in |users|}}
+  <li>{{user.name}}</li>
+{{/each}}
+</ul>
+```
+
+`selector: user-list`之前已经解释过，稍后就会看到他的用处。
+
+这里还有一个很有意思的es6特性，那就是模板字符串**Template String**。与普通字符串不同，他用**`**把内容括起来，当然他有一个很厉害的功能：
 
 ```js
 var test = 'test'
-var oldConcatStr = 'this is ' + test + 'template string'
-var tempStr = `this is ${test} template string`
+var oldStr = 'this is ' + test + 'template string'
+var newStr = `this is ${test} template string`
 ```
 
-当然，还有重要的`*ngFor`，名字可以看出来，他用于循环列表。`#user of users`表示我们要循环`users`，每一项用`user`来表示。然后`{{user.name}}`就是说要区`user`的`name`属性。`user`就是`#user of users`中的`user`。
+没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。
 
-接下来是导出组件，`UserListComponent`组件实现了`OnInit`，就像之前所说的那样。然后在里面定义一些属性。`users`你肯定已经知道了，但是要注意一下写法`users: User[]`，其中`: User[]`表示`user`的类型为`User[]`。`User`前面已经定义好了，带一个`[]`表示他是一个数组，数组里面的每一项都是`User`类型。这里并没有给他赋值，因为我想在组件初始化的时候给他赋值。那么接下来的这个方法就用来做这件事情。`ngOnInit`是一个钩子方法，目的就是刚才说的，要自定义初始化方法，`implements OnInit`也是这个意思。
-
-最下面就是一些静态数据，他的类型签名是`User[]`。
+还有重要的一点没有说，模板里的`users`是从哪里来的？你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
 
 然后要做的工作就是把这个组件塞到之前的`AppComponent`的组件里面：
 
