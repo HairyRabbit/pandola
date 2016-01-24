@@ -1,3 +1,5 @@
+导航：
+
 * [那么首先，祝大家新年快乐](#那么首先，祝大家新年快乐)
 * [写在之前，Coffee Or Tea？](#写在之前，Coffee Or Tea？)
 * [准备活动是必不可少的](#准备活动是必不可少的)
@@ -593,44 +595,18 @@ export class UserService {
 
 在`UserService`类的构造函数中赋给`users`属性初值，`[]`，一个空列表。
 
-同时`UserService`类中申明了一个`getUsers`方法，该方法用来获取用户数据。注意类型签名，他返回一个泛型`Promise<Users[]>`，使用Promise是为了模拟从服务器端异步请求，后边可以直接换成**AJAX**。
+同时`UserService`类中申明了一个`getUsers`方法，该方法用来获取用户数据。注意类型签名，一个泛型`Promise<Users[]>`，使用Promise是为了模拟从服务器端异步请求，后边可以直接换成**AJAX**。
 
 这样`app/user-list.component.ts`也要做一下小手术了：
 
 ```typescript
 /* @file app/user-list.component.ts */
-import { Component, OnInit } from 'angular2/core'
 import { User, UserService } from './user.service'
-
-const component = {
-  selector: 'user-list',
-  template: `
-    <div *ngIf="getUsersCount()">
-      <ul>
-        <li *ngFor="#user of users">
-        {{user.name}}
-        </li>
-      </ul>
-      <p>用户的数量是：{{getUsersCount()}}</p>
-    </div>
-    <div *ngIf="!getUsersCount()">
-      <p>木有用户(°Д°)</p>
-    </div>
-  `
-}
 
 @Component(component)
 export class UserListComponent implements OnInit {
-
   constructor(private _service: UserService) {}
-  
-  users: User[]
-
-  getUsersCount(): number {
-    if(!this.users) return 0
-    return this.users.length
-  }
-  
+  //...
   ngOnInit() {
     this._service.getUsers().then(users => this.users = users)
   }
@@ -659,9 +635,9 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-在构造函数中为属性赋值，这个模式太常见了，所以ts把他直接弄到构造函数中来表示。
+在构造函数中为属性赋值，这个模式太常见了，所以ts把他直接弄到构造函数中来简写了这个功能。
 
-初始化方法也有点不同，用了Promise的写法：
+初始化方法也有点不同，用了`Promise`的写法：
 
 ```typescript
 export class UserListComponent implements OnInit {
@@ -672,7 +648,65 @@ export class UserListComponent implements OnInit {
 } 
 ```
 
-调用的就是service中的`UserService#getUsers`方法。有意思的是后面的`users => this.users = user`这是什么呢？
+调用的就是service中的`UserService#getUsers`方法。
+
+`Promise`也是es6中的新特性，介绍他需要大量篇幅，这里就简单理解为带有一个上下文的容器。他的上下文就是不久之后的操作会成功或失败。Promise可以代替常见的回调写法，举个jQuery调用AJAX的栗子：
+
+```js
+$.ajax({
+  url: '/api',
+  success: function(data) {
+  // 请求成功会执行这个方法
+  },
+  error: function(err) {
+  // 失败时执行的方法
+  }
+})
+```
+
+上面的代码可以转为`Promise`的形式：
+
+```js
+$.ajax({ url: '/api' })
+ .then(function() {
+   // 请求成功会执行这个方法
+ }, function() {
+   // 失败时执行的方法
+ })
+```
+
+如此所见，$.ajax返回了一个`Promise`，这个`Promise`可能成功或失败。`then`方法接受两个参数，分别代表了成功和失败时调用的函数。
+
+`Promise`强大的一个体现是可以链式调用，比如说：
+
+```js
+function map(fn) {
+	return function(a) {
+		return a.map(fn)
+	}
+}
+function add10(x) {
+  return x + 10
+}
+function sayHello(x) {
+  return 'Hello, ' + x
+}
+function toString(x) {
+  return x.join(' and ')
+}
+
+Promise.resolve([1, 2, 3])
+  .then(map(add10))
+  .then(map(sayHello))
+  .then(toString)
+  .then(console.log)
+  
+//=> Hello, 11 and Hello, 12 and Hello, 13
+```
+
+Promise对处理异步流起到了非常重要的作用。
+
+更有意思的是后面的`users => this.users = user`这是什么呢？
 
 这个写法是es6中的箭头函数，他可以写为：
 
