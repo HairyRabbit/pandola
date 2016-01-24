@@ -470,9 +470,9 @@ var oldStr = 'this is ' + foo + 'template string'
 var newStr = `this is ${foo} template string`
 ```
 
-效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。
+效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。更重要的一点是，他支持多行文本，这样就不需要在字符串末尾使用`+`号拼接了。
 
-还有重要的一点没有说，模板里的`users`是从哪里来的？你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
+还有重要的一点没有说，模板里的`users`是从哪来的？我想你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
 
 接下来要做的工作就是把这个组件塞到之前的`app/app.component.ts`的`template`里：
 
@@ -481,12 +481,9 @@ var newStr = `this is ${foo} template string`
 import { UserListComponent } from './user-list.component'
 
 const component = {
-  selector: 'my-app',
+  //...
   directives: [UserListComponent],
-  template: `
-    <h1>Hello World</h1>
-    <user-list></user-list>
-  `
+  //...
 }
 
 //...
@@ -499,66 +496,6 @@ ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`dir
 这里要思考的一点是，想要使用我们自定义的组件，就必须明确告诉ng2，做法就是务必写在`directives`中。同时，组件就是一个`directive`。
 
 接下来看下效果吧，页面应该早就刷新好了。
-
-# 感觉简单，就再来一些模板
-
-接下来想要实现一个功能，在没有用户即空列表时，显示一句话友好的告诉别人还没有用户；而在有用户时照常显示用户列表。要实现这个，需要if条件逻辑:
-
-```typescript
-/* @file app/user-list.component.ts */
-const component = {
-  //...
-  template: `
-    <div *ngIf="getUsersCount()">
-      <ul>
-        <li *ngFor="#user of users">
-          {{user.name}}
-        </li>
-      </ul>
-      <p>用户的数量是：{{getUsersCount()}}</p>
-    </div>
-    <div *ngIf="!getUsersCount()">
-      <p>木有用户(°Д°)</p>
-    </div>
-  `
-}
-```
-
-`*ngIf`就是我们需要的，而功能的话也无需过多解释。等号后面相当于条件语句，这里是一个表达式`getUsersCount()`，说明他是一个方法，而且这个方法应该返回一个或能转换成`true`或`false`的值。
-
-在组件类`UserListComponent`里添加一个`getUsersCount`方法：
-
-```typescript
-/* @file app/user-list.component.ts */
-export class UserListComponent implements OnInit {
-  //...
-  getUsersCount(): number {
-    if(!this.users) return 0
-    return this.users.length
-  }
-  //...
-}
-```
-
-如果没有用户，就返回`0`，这样会被隐式转换成`false`；当然，有用户时就返回用户的数量。注意他的类型签名，这个方法返回了一个数字，也就是`number`类型。
-
-为什么不直接返回一个布尔类型的值？因为我还想在之后统计一下用户的数量：
-
-```typescript
-/* @file app/user-list.component.ts */
-const component = {
-  //...
-  template: `
-    //...
-    <p>用户的数量是：{{getUsersCount()}}</p>
-	//...
-  `
-}
-```
-
-静态数据`USERS`已经没用了，可以把它删掉了。浏览器刷新后，会看到空列表模板。
-
-if模板和for模板应该是模板当中使用最多的，但显示一个列表未免也太显无聊了点。接下来做一些有意思的功能，比如增删改。
 
 # 就是这个感觉，来点有意思的
 
@@ -739,6 +676,8 @@ const component = {
 `providers`就用来提供`service`的。
 
 这样就可以了。接下来还是考虑实现增删改吧。
+
+[回到顶部](#)
 
 # 揉揉眼睛，你不会走开的对不
 
