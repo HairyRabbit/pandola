@@ -681,85 +681,112 @@ const component = {
 
 # 揉揉眼睛，你不会走开的对不
 
-首先就让我们非常有诚意的添加输入框：
+添加，肯定有输入框，就让我们在模板里有诚意的添加一个框：
 
 ```typescript
 /* @file app/user-list.component.ts */
-template: `
-  <div>
-    <label>
-      添加新用户
-      <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" />
-    </label>
-    <button type="button">确定</button>
-    <p>要添加的用户为：{{newUser}}</p>
-  </div>
-		
-  <div *ngIf="getUsersCount()">
-    <ul>
-      <li *ngFor="#user of users">
-      {{user.name}}
-      </li>
-    </ul>
-    <p>用户的数量是：{{getUsersCount()}}</p>
-  </div>
-  <div *ngIf="!getUsersCount()">
-    <p>木有用户(°Д°)</p>
-  </div>
+const component = {
+  template: `
+    <div>
+      <label>
+        添加新用户
+        <input type="text" [(ngModel)]="newUserName" placeholder="请输入用户名" />
+      </label>
+      <button type="button">确定</button>
+      <p>要添加的用户为：{{newUserName}}</p>
+    </div>
+  //...
   `
-```
-
-对模板稍作修改，增加输入框和提交按钮，然后在下边显示即将添加的用户。除此之外，由于用到了`newUser`，所以要在组件里面声明这个属性，他的类型签名是`string`：
-
-```typescript
-/* @file app/user-list.component.ts */
-newUser: string
-```
-
-在里面输入一些字试试看。Amazing！绑定果然很强大。接下来真正实现添加用户功能，这需要一个按钮的点击事件：
-
-```typescript
-/* @file app/user-list.component.ts */
-<button type="text" (click)="createUser()">确定</button>
-```
-
-就像这样，很简单不是么。`createUser`就是事件要调取的方法，在组件里面实现他：
-
-```typescript
-/* @file app/user-list.component.ts */
-createUser(): void {
-  if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
-  this._service.createUser(this.newUser).then(user => this.users = this.users.concat(user))
 }
 ```
 
-当然，`newUser`为空时并没什么卵用，不为空时，把他委托给`service`，就好像请求服务器那样：
+当然，除了输入框，还需要一个添加按钮。为了展示绑定的威力还增加了一段用于显示将要添加的用户。
+
+`[(ngModel)]`的作用是双向绑定，这也是ng2的一个核心功能，等号后边就是绑定的值。双向绑定意味着绑定是双向的，也就是说，输入框输入内容后，绑定的属性也会更着改变。而将属性手动改变后，输入框的值也会变化。由于绑定了`newUserName`，我们在组件中添加一个属性：
+
+```typescript
+/* @file app/user-list.component.ts */
+export class UserListComponent implements OnInit {
+  //...
+  newUserName: string = ''
+  //...
+}
+```
+
+注意他的类型签名，`string`，而且给他赋了初值。
+
+现在就在里面输入一些字试试看吧。Amazing！绑定果然很强大。下面接着来实现添加用户，这需要给按钮绑定点击事件：
+
+```typescript
+/* @file app/user-list.component.ts */
+const component = {
+  template: `
+    <button type="text" (click)="createUser()">确定</button>
+  `
+}
+```
+
+`createUser()`就是事件要调取的方法，我们还是在组件中实现他：
+
+```typescript
+/* @file app/user-list.component.ts */
+export class UserListComponent implements OnInit {
+  //...
+  createUser(): void {
+    if(!this.newUser.trim()) return;
+    this._service.createUser(this.newUser).then(user => this.users = this.users.concat(user))
+  }
+  //...
+}
+```
+
+可是要怎么实现他？还记得`service`么？
+
+先来实现`service`的添加新用户功能：
 
 ```typescript
 /* @file app/user.service.ts */
-createUser(newUser: string): Promise<User> {
-  return Promise.resolve({ id: +new Date(), name: newUser})
+export class UserService {
+  //...
+  createUser(newUserName: string): Promise<boolean> {
+    let user = { id: +new Date(), name: newUserName }
+    this.users.push(user)
+    return Promise.resolve(true)
+  }
+  //...
 }
 ```
 
-很简单，只有短短一行。`id`的话就用时间截来代替吧，注意这里的类型签名。
+`UserService#createUser`方法接受一个字符串，构造出一个新的`user`，然后返回`Promise`用于模拟从服务器端返回。在构造`user`时，用当前时间截充当新的`id`，由于时间截是`number`类型，所以完全符合`User`接口。
 
-回到前边`app/user-list.component.ts`的`createUser()`，请求成功后，把当前的`users`替换为新的`users`，这里用到了`concat`函数：
-
-```typescript
-[1, 2, 3].concat(4) //=> [1, 2, 3, 4]
-```
-
-来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定。不过好像少写了一些东西。添加成功后，应该把`newUser`清空，这个简单：
+这样组件中的`UserListComponent#createUser`就很简单了：
 
 ```typescript
 /* @file app/user-list.component.ts */
-createUser(): void {
-  if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
-  this._service.createUser(this.newUser).then(user => {
-    this.users = this.users.concat(user)
-    this.newUser = '';
-  })
+export class UserListComponent implements OnInit {
+  //...
+  createUser(): void {
+    if(!this.newUserName.trim()) return;
+    this._service.createUser(this.newUserName)
+  }
+  //...
+}
+```
+
+因为绑定的存在，不需要去管`UserListComponent#users`的值，他会自己更新。当然，`newUserName`为空时没什么暖用，要过滤掉。
+
+来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定的威力。不过好像少写了一些东西，添加成功后，要把`newUserName`清空，这个简单：
+
+```typescript
+/* @file app/user-list.component.ts */
+export class UserListComponent implements OnInit {
+  //...
+  createUser(): void {
+    if(!this.newUserName.trim()) return;
+	let resetNewUserName = () => this.newUserName = ''
+    this._service.createUser(this.newUserName).then(resetNewUserName)
+  }
+  //...
 }
 ```
 
