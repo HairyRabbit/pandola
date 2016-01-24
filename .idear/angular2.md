@@ -324,9 +324,9 @@ bootstrap(AppComponent)
 
 展示模板的最好方法就是做一个列表，然后再花样显示上去。
 
-Hello World就留在那里。实现一个用来显示用户姓名的列表。
+Hello World就让他留在那里吧。我们计划实现一个用来显示用户姓名的简单列表。
 
-那么再来新建一个组件，我想给他取名`UserListComponent`很合适。新建文件`app/user-list.component.ts`。之前在命名`app/app.component.ts`时说到了命名规范，这里再加一条，词组的话用`-`来连接每个单词，就像上面那样：
+还是先来新建一个组件，给他取名`UserListComponent`我想就很合适。新建文件`app/user-list.component.ts`。之前在命名`app/app.component.ts`时说到了命名规范，这里再加一条，词组的话用`-`来连接每个单词，就像上面那样：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -365,9 +365,9 @@ const USERS: User[] = [
 ]
 ```
 
-这次出来了新东西，`interface`。解释之前还是先从上到下看一下代码内容。与`app/app.component.ts`不同，第一行除了导入`Component`外，还导入了`OnInit`，这是一个接口，也就是`interface`。
+有新东西，`interface`。在解释之前还是先浏览一下代码内容。与`app/app.component.ts`不同的是，第一行除了导入`Component`外，还导入了`OnInit`，这是一个接口，也就是`interface`。
 
-`interface`接口是ts中对js的扩展，如果有其他oop编程经验那么肯定不会对他陌生。接口可以表现为对行为的一种约束，就是说如果"xxx实现了某种接口，那么xxx必然具备这个接口的所有内容"。看一下这行代码：
+`interface`接口是ts中的扩展内容，如果你有其他oop编程经验那么肯定不会对接口感到陌生。接口可以表现为对行为的一种约束，就是说如果"xxx实现了某种接口，那么xxx必然具备这个接口的所有内容"。看一下这行代码：
 
 ```typescript
 export class UserListComponent implements OnInit {
@@ -378,7 +378,16 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-这句话可以翻译为实现了`OnInit`接口的`UserListComponent`类。既然要实现这个接口，必然也要实现接口里面的内容，那就是`ngOnInit`方法。这个方法会在初始化该类时调用。
+这句话可以翻译为“实现了`OnInit`接口的`UserListComponent`类”。既然要实现这个接口，必然也要实现接口里面的内容，那就是`ngOnInit`方法，因为`ngOnInit`方法定义在`OnInit`接口中。这个方法会在初始化该类时调用，所以可以写一些自己的逻辑在里面，比如赋值操作：
+
+```typescript
+//...
+ngOnInit() {
+  if(!USERS) return
+  this.users = USERS
+}
+//...
+```
 
 如果感觉很抽象，再看看这个会好一些：
 
@@ -389,7 +398,7 @@ interface User {
 }
 ```
 
-这是我们自定义的接口，而`OnInit`是ng2定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必须要求包括这两个属性。再来看看最后几行代码：
+这是我们自定义的接口，`OnInit`是ng2已经定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必须要求包括这两个属性。再来看看最后几行代码：
 
 ```typescript
 const USERS: User[] = [
@@ -416,7 +425,7 @@ const component = {
 }
 ```
 
-`*ngFor`，从名字可以揣测出他的用途。没错，他用来循环列表，而后面的`#user of users`则可译为："users中的每一项用user表示"。而`{{user.name}}`不必多说你也已经清楚了。这里取的是每个`user`的`name`属性。回忆一下其他框架中是怎么做的：
+`*ngFor`，从名字上就可以揣测出他的用途。没错，他用来循环列表，而后面的`#user of users`则可译为："users中的每一项用user表示"。而`{{user.name}}`不必多说你也已经清楚了。这里取的是每个`user`的`name`属性。回忆一下其他框架中是怎么做的：
 
 react:
 
@@ -445,12 +454,12 @@ emberjs:
 这里还有一个很有意思的es6特性，那就是模板字符串**Template String**。与普通字符串不同，他用 **`** 符号把内容括起来，当然还有一个更厉害的功能：
 
 ```js
-var test = 'test'
-var oldStr = 'this is ' + test + 'template string'
-var newStr = `this is ${test} template string`
+var foo = 'bar'
+var oldStr = 'this is ' + foo + 'template string'
+var newStr = `this is ${foo} template string`
 ```
 
-没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。
+效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。
 
 还有重要的一点没有说，模板里的`users`是从哪里来的？你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
 
@@ -476,49 +485,75 @@ const component = {
 
 ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`directives`的值是一个数组，里面存放我们的组件。
 
-这里要思考的一点是，ng2的组件其实就是一个`directive`。
+这里要思考的一点是，想要使用我们自定义的组件，就必须明确告诉ng2，做法就是务必写在`directives`中。同时，组件就是一个`directive`。
 
 接下来看下效果吧，页面应该早就刷新好了。
 
-# 太简单了，老板再来一些模板
+# 感觉简单，就再来一些模板
 
-我要实现一个功能，在空列表时显示一句话告诉别人没有用户，而在不为空时显示用户列表。要实现这个，需要用到`*ngIf`:
-
-```typescript
-template: `
-  <div *ngIf="getUsersCount()">
-    <ul>
-      <li *ngFor="#user of users">
-        {{user.name}}
-      </li>
-    </ul>
-    <p>用户的数量是：{{getUsersCount()}}</p>
-  </div>
-  <div *ngIf="!getUsersCount()">
-    <p>木有用户(°Д°)</p>
-  </div>
-`
-```
-
-在组件`UserListComponent`里添加一个`getUsersCount`方法：
+接下来想要实现一个功能，在没有用户即空列表时，显示一句话友好的告诉别人还没有用户；而在有用户时照常显示用户列表。要实现这个，需要if条件逻辑:
 
 ```typescript
-getUsersCount(): number {
-  return this.users.length
+/* @file app/user-list.component.ts */
+const component = {
+  //...
+  template: `
+    <div *ngIf="getUsersCount()">
+      <ul>
+        <li *ngFor="#user of users">
+          {{user.name}}
+        </li>
+      </ul>
+      <p>用户的数量是：{{getUsersCount()}}</p>
+    </div>
+    <div *ngIf="!getUsersCount()">
+      <p>木有用户(°Д°)</p>
+    </div>
+  `
 }
 ```
 
-注意他的类型签名，这个方法返回一个数字，也就是`number`类型。
+`*ngIf`就是我们需要的，而功能的话也无需过多解释。等号后面相当于条件语句，这里是一个表达式`getUsersCount()`，说明他是一个方法，而且这个方法应该返回一个或能转换成`true`或`false`的值。
 
-静态数据`users`已经没用了，可以把它删掉了。浏览器刷新后，会看到空列表模板。
+在组件类`UserListComponent`里添加一个`getUsersCount`方法：
 
-显示列表已经完全没有问题，接下来让我们做一些更有意思的功能，比如增加和删除。
+```typescript
+/* @file app/user-list.component.ts */
+export class UserListComponent implements OnInit {
+  //...
+  getUsersCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+  //...
+}
+```
 
-# 来点更有意思的吧
+如果没有用户，就返回`0`，这样会被隐式转换成`false`；当然，有用户时就返回用户的数量。注意他的类型签名，这个方法返回了一个数字，也就是`number`类型。
 
-在这之前我想先声明一点，在组件里那样处理数据是不好的习惯。合理的做法是用一些方法来单独处理数据，在组件里只需要调用这些方法。在ng2里面，他叫做**service**。
+为什么不直接返回一个布尔类型的值？因为我还想在之后统计一下用户的数量：
 
-试着把刚才的数据移到service里，新建一个文件`app/user.service.ts`:
+```typescript
+/* @file app/user-list.component.ts */
+const component = {
+  //...
+  template: `
+    //...
+    <p>用户的数量是：{{getUsersCount()}}</p>
+	//...
+  `
+}
+```
+
+静态数据`USERS`已经没用了，可以把它删掉了。浏览器刷新后，会看到空列表模板。
+
+if模板和for模板应该是模板当中使用最多的，但显示一个列表未免也太显无聊了点。接下来做一些有意思的功能，比如增删改。
+
+# 就是这个感觉，来点有意思的
+
+在开始之前先声明一点，静态数据`USERS`只是为了演示功能。在ng2里数据和组件应该隔离开，数据被放在叫做**service**的类里。
+
+试着把刚才的静态数据移到service里，新建一个文件`app/user.service.ts`:
 
 ```typescript
 /* @file app/user.service.ts */
@@ -531,17 +566,27 @@ export interface User {
 
 @Injectable()
 export class UserService {
+  constructor() { 
+    this.users = [] 
+  }
+  
+  users: User[]
+  
   getUsers(): Promise<User[]> {
-    return Promise.resolve([])
+    return Promise.resolve(this.users)
   }
 }
 ```
 
-快来看，我们遇到了第二个注解`@Injectable`。这个注解的作用是将service注入到其他依赖的地方，从名字就能看出端倪。
+快来看，我们遇到了第二个注解，`@Injectable`。于`@Component`类似，这个注解表明该类是可注入的。注意后边有一对括号，丢了他们ng2可不干。
 
-然后还做了一些工作，把`app/user-list.component.ts`中的`User`接口移了过来，并用`export`导出。在UserService类中写了一个方法`getUsers`，他返回一个`Promise`，用来模拟从服务器端请求数据，然后这个Promise返回了空列表`[]`。
+`User`接口也被移到了这里，并用`export`导出。
 
-这样我们的`app/user-list.component.ts`要做一些改动了：
+在`UserService`类的构造函数中赋给`users`属性初值，`[]`，一个空列表。
+
+同时`UserService`类中申明了一个`getUsers`方法，该方法用来获取用户数据。注意类型签名，他返回一个泛型`Promise<Users[]>`，使用Promise是为了模拟从服务器端异步请求，后边可以直接换成**AJAX**。
+
+这样`app/user-list.component.ts`也要做一下小手术了：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -577,41 +622,82 @@ export class UserListComponent implements OnInit {
     return this.users.length
   }
   
-  ngOnInit(): void {
+  ngOnInit() {
     this._service.getUsers().then(users => this.users = users)
   }
 }
 ```
 
-改了不少东西。首先将`User`类型和`UserService`导入。然后在组件类中定义了一个构造函数
+组件类中多了一个构造函数：
 
 ```typescript
-constructor(private _service: UserService) {}
-```
-
-这里的`_service`就是`UserService`，`private`是访问修饰符表示私有。在`getUsersCount`添加了空数组处理。而在`ngOnInit`钩子里，请求了`service`的方法，并用`Promise`的写法将数据赋给`this.users`，当然，他的值是`[]`。
-
-悲剧的是，浏览器刷新后报错了，ng抱怨说没有提供`UserService`，为什么呢？
-
-之所以写在构造函数里的原因就是在构造时需要`UserService`，那什么时候构造的呢？你猜对了，是在`AppComponent`那边。所以要修改一下`app/app.component.ts`：
-
-```typescript
-import { UserService } from './user.service';
-
-const component = {
-  selector: 'my-app',
-  directives: [UserListComponent],
-  providers: [UserService],
-  template: `
-    <h1>Hello World</h1>
-    <user-list></user-list>
-  `
+export class UserListComponent implements OnInit {
+  constructor(private _service: UserService) {}
+  //...
 }
 ```
 
-这样就可以了。接下来实现增加和删除功能。
+有点不好理解。这是ts中的写法，可以转换成如下的代码：
 
-# 你不会走开的对不
+```typescript
+export class UserListComponent implements OnInit {
+
+  private _service: UserService
+  
+  constructor(userService: UserService) {
+    this._service = userService
+  }
+}
+```
+
+在构造函数中为属性赋值，这个模式太常见了，所以ts把他直接弄到构造函数中来表示。
+
+初始化方法也有点不同，用了Promise的写法：
+
+```typescript
+export class UserListComponent implements OnInit {
+  //...
+  ngOnInit() {
+    this._service.getUsers().then(users => this.users = users)
+  }
+} 
+```
+
+调用的就是service中的`UserService#getUsers`方法。有意思的是后面的`users => this.users = user`这是什么呢？
+
+这个写法是es6中的箭头函数，他可以写为：
+
+```typescript
+var _this = this
+this._service.getUsers().then(function(users) {
+  _this.users = users
+})
+```
+
+观察上面的代码，除了更优雅之外，还有一个更重要的功能，那就是可以绑定this。用箭头函数，就可以不用考虑this问题了。箭头函数也是es6中使用最多的特性之一。
+
+悲剧的是，浏览器刷新后报错了，ng抱怨说没有提供`UserService`，为什么呢？
+
+在构造函数里声明`UserService`，只说明了一个问题，那就是这个类需要`UserService`。所以必须在某个地方提供他。猜猜要怎么做？
+
+如果猜到是在`AppComponent`类中，那么给你9.9分，剩下的0.1分不给你怕你膨胀。这里要修改一下`app/app.component.ts`：
+
+```typescript
+/* @file app/app.component.ts */
+import { UserService } from './user.service';
+
+const component = {
+  //...
+  providers: [UserService],
+  //...
+}
+```
+
+`providers`就用来提供`service`的。
+
+这样就可以了。接下来还是考虑实现增删改吧。
+
+# 揉揉眼睛，你不会走开的对不
 
 首先就让我们非常有诚意的添加输入框：
 
