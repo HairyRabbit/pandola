@@ -21,6 +21,8 @@
 
 2016，不如来看下**ng2**吧。
 
+[回到顶部](#)
+
 # 写在之前，Coffee Or Tea？
 
 [angular](https://github.com/angular/angular.js)我想大家已经都相当熟悉了，就算没有真正玩过，也会天天听到这个词，简直烦到不能。这个mvvm框架是目前使用人数最多的mv(x)框架。恩，当然，这次我们的主角并不是ng，而是[angular2](https://github.com/angular/angular)。
@@ -50,6 +52,8 @@ nodejs准备好，就可以愉快的开始了。接下来的任务先要配置�
 * 路由模块
 
 我将用一个简单明了的demo来刻画这些内容。:ghost:
+
+[回到顶部](#)
 
 # 准备活动是必不可少的
 
@@ -105,8 +109,8 @@ nodejs问你一大堆问题，名称、版本号什么的，括号里面是默�
   "es6-promise": "^3.0.2",
   "es6-shim": "^0.33.3",
   "lite-server": "^1.3.2",
-  "reflect-metadata": "^0.1.2",
-  "rxjs": "^5.0.0-beta.0",
+  "reflect-metadata": "0.1.2",
+  "rxjs": "5.0.0-beta.0",
   "systemjs": "^0.19.14",
   "typescript": "^1.7.5",
   "zone.js": "^0.5.10"
@@ -146,8 +150,8 @@ nodejs问你一大堆问题，名称、版本号什么的，括号里面是默�
     "es6-shim": "^0.33.3",
     "lite-server": "^1.3.2",
     "node-uuid": "^1.4.7",
-    "reflect-metadata": "^0.1.2",
-    "rxjs": "^5.0.0-beta.0",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-beta.0",
     "systemjs": "^0.19.14",
     "typescript": "^1.7.5",
     "zone.js": "^0.5.10"
@@ -221,6 +225,7 @@ npm install --verbose
     </script>
   </head>
   <body>
+    <!-- Application root container. -->
     <my-app>Loading...</my-app>
   </body>
 </html>
@@ -235,6 +240,8 @@ npm run start
 浏览器会自动打开`localhost:3000`的地址，会显示`Loading...`:rabbit:。
 
 先喝杯java休息一下，别走开，紧接着开始我们的第一个组件，就是那个奇怪的`<my-app>Loading...</my-app>`。
+
+[回到顶部](#)
 
 # 他们都一样，没什么区别
 
@@ -330,6 +337,8 @@ bootstrap(AppComponent)
 这就是启动方式，现在可以不用理解`bootstrap`到底做了什么。保存片刻之后浏览器自动刷新，会看到大大的**Hello World**:joy:。
 
 接下来摆弄一下强大的模板。
+
+[回到顶部](#)
 
 # 没错，模板最大
 
@@ -454,7 +463,7 @@ emberjs:
 
 ```hbs
 <ul>
-{{#each user in |users|}}
+{{#each user as |users|}}
   <li>{{user.name}}</li>
 {{/each}}
 </ul>
@@ -470,7 +479,7 @@ var oldStr = 'this is ' + foo + 'template string'
 var newStr = `this is ${foo} template string`
 ```
 
-效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。更重要的一点是，他支持多行文本，这样就不需要在字符串末尾使用`+`号拼接了。
+效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。更重要的一点是，他支持多行文本，这样就不需要在字符串末尾使用`+`号拼接了。ng2充分利用了这个特性，你都看到了。
 
 还有重要的一点没有说，模板里的`users`是从哪来的？我想你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
 
@@ -483,19 +492,83 @@ import { UserListComponent } from './user-list.component'
 const component = {
   //...
   directives: [UserListComponent],
+  template: '<h1>Hello World</h1><user-list></user-list>'
   //...
 }
-
 //...
 ```
 
 首先在页面顶部先把组件用`import`导入。
 
-ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`directives`的值是一个数组，里面存放我们的组件。
+有个问题，ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`directives`的值是一个数组，里面存放我们想要使用的组件。
 
 这里要思考的一点是，想要使用我们自定义的组件，就必须明确告诉ng2，做法就是务必写在`directives`中。同时，组件就是一个`directive`。
 
-接下来看下效果吧，页面应该早就刷新好了。
+来看下效果吧，页面应该早就刷新好了。
+
+[回到顶部](#)
+
+# 感觉简单，就再来一些模板
+
+接下来想要实现一个功能，在没有用户即空列表时，显示一句话友好的告诉别人还没有用户；而在有用户时照常显示用户列表。要实现这个，需要if条件逻辑:
+
+```typescript
+/* @file app/user-list.component.ts */
+const component = {
+  //...
+  template: `
+    <div *ngIf="getUsersCount()">
+      <ul>
+        <li *ngFor="#user of users">
+          {{user.name}}
+        </li>
+      </ul>
+      <p>用户的数量是：{{getUsersCount()}}</p>
+    </div>
+    <div *ngIf="!getUsersCount()">
+      <p>木有用户(°Д°)</p>
+    </div>
+  `
+}
+```
+
+`*ngIf`就是我们需要的，而功能的话也无需过多解释。等号后面相当于条件语句，这里是一个表达式`getUsersCount()`，说明他是一个方法，而且这个方法应该返回一个或能转换成`true`或`false`的值。
+
+在组件类`UserListComponent`里添加一个`getUsersCount`方法：
+
+```typescript
+/* @file app/user-list.component.ts */
+export class UserListComponent implements OnInit {
+  //...
+  getUsersCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+  //...
+}
+```
+
+如果没有用户，就返回`0`，这样会被隐式转换成`false`；当然，有用户时就返回用户的数量。注意他的类型签名，这个方法返回了一个数字，也就是`number`类型。
+
+为什么不直接返回一个布尔类型的值？因为我还想在之后统计一下用户的数量：
+
+```typescript
+/* @file app/user-list.component.ts */
+const component = {
+  //...
+  template: `
+    //...
+    <p>用户的数量是：{{getUsersCount()}}</p>
+	//...
+  `
+}
+```
+
+静态数据`USERS`已经没用了，把它删掉了。浏览器刷新后，会看到空列表模板。
+
+if模板和for模板应该是模板当中使用最多的，但显示一个列表未免也太显无聊了点。接下来做一些有意思的功能，比如增删改。
+
+[回到顶部](#)
 
 # 就是这个感觉，来点有意思的
 
@@ -664,7 +737,7 @@ this._service.getUsers().then(function(users) {
 
 ```typescript
 /* @file app/app.component.ts */
-import { UserService } from './user.service';
+import { UserService } from './user.service'
 
 const component = {
   //...
@@ -681,41 +754,43 @@ const component = {
 
 # 揉揉眼睛，你不会走开的对不
 
-添加，肯定有输入框，就让我们在模板里有诚意的添加一个框：
+添加功能，一定要有输入框，让我们有诚意的为其添加一个：
 
 ```typescript
 /* @file app/user-list.component.ts */
+//...
 const component = {
   template: `
     <div>
       <label>
         添加新用户
-        <input type="text" [(ngModel)]="newUserName" placeholder="请输入用户名" />
+        <input type="text" [(ngModel)]="username" placeholder="请输入用户名" />
       </label>
       <button type="button">确定</button>
-      <p>要添加的用户为：{{newUserName}}</p>
+      <p>要添加的用户为：{{username}}</p>
     </div>
   //...
   `
 }
+//...
 ```
 
 当然，除了输入框，还需要一个添加按钮。为了展示绑定的威力还增加了一段用于显示将要添加的用户。
 
-`[(ngModel)]`的作用是双向绑定，这也是ng2的一个核心功能，等号后边就是绑定的值。双向绑定意味着绑定是双向的，也就是说，输入框输入内容后，绑定的属性也会更着改变。而将属性手动改变后，输入框的值也会变化。由于绑定了`newUserName`，我们在组件中添加一个属性：
+`[(ngModel)]`的作用是双向绑定，这也是ng2的一个核心功能，等号后边就是绑定的值。双向绑定意味着绑定是双向的（这不是废话么。。。），也就是说，输入框输入内容后，等号后边绑定的属性值也会更着改变。而将属性值手动更改后，输入框的值也会随之变化。由于绑定了`newUserName`，我们在组件中添加一个属性：
 
 ```typescript
 /* @file app/user-list.component.ts */
 export class UserListComponent implements OnInit {
   //...
-  newUserName: string = ''
+  username: string = ''
   //...
 }
 ```
 
 注意他的类型签名，`string`，而且给他赋了初值。
 
-现在就在里面输入一些字试试看吧。Amazing！绑定果然很强大。下面接着来实现添加用户，这需要给按钮绑定点击事件：
+现在就在里面输入一些字试试看吧。Amazing！绑定功能果然很强大。下面接着来实现添加用户，这需要给按钮绑定点击事件：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -726,30 +801,29 @@ const component = {
 }
 ```
 
-`createUser()`就是事件要调取的方法，我们还是在组件中实现他：
+`createUser()`就是事件要调取的方法句柄，我们还是在组件中实现他：
 
 ```typescript
 /* @file app/user-list.component.ts */
 export class UserListComponent implements OnInit {
   //...
   createUser(): void {
-    if(!this.newUser.trim()) return;
-    this._service.createUser(this.newUser).then(user => this.users = this.users.concat(user))
+    //...
   }
   //...
 }
 ```
 
-可是要怎么实现他？还记得`service`么？
+可是要怎么实现呢？还记得`service`么？
 
-先来实现`service`的添加新用户功能：
+不如我们先来实现`service`中添加新用户的功能：
 
 ```typescript
 /* @file app/user.service.ts */
 export class UserService {
   //...
-  createUser(newUserName: string): Promise<boolean> {
-    let user = { id: +new Date(), name: newUserName }
+  createUser(username: string): Promise<boolean> {
+    let user = { id: +new Date(), name: username }
     this.users.push(user)
     return Promise.resolve(true)
   }
@@ -757,7 +831,9 @@ export class UserService {
 }
 ```
 
-`UserService#createUser`方法接受一个字符串，构造出一个新的`user`，然后返回`Promise`用于模拟从服务器端返回。在构造`user`时，用当前时间截充当新的`id`，由于时间截是`number`类型，所以完全符合`User`接口。
+`UserService#createUser`方法接受一个字符串，构造出一个新的`user`，然后返回`Promise`用于模拟从服务器端返回，返回`true`就表示服务器端添加成功了。
+
+在构造`user`时，用当前时间截充当新的`id`，因为时间截是`number`类型，所以完全符合`User`接口的约束。
 
 这样组件中的`UserListComponent#createUser`就很简单了：
 
@@ -766,8 +842,8 @@ export class UserService {
 export class UserListComponent implements OnInit {
   //...
   createUser(): void {
-    if(!this.newUserName.trim()) return;
-    this._service.createUser(this.newUserName)
+    if(!this.username.trim()) return
+    this._service.createUser(this.username)
   }
   //...
 }
@@ -782,39 +858,59 @@ export class UserListComponent implements OnInit {
 export class UserListComponent implements OnInit {
   //...
   createUser(): void {
-    if(!this.newUserName.trim()) return;
-	let resetNewUserName = () => this.newUserName = ''
-    this._service.createUser(this.newUserName).then(resetNewUserName)
+    if(!this.username.trim()) return;
+	let resetUserName = () => this.username = ''
+    this._service.createUser(this.username).then(resetUserName)
   }
   //...
 }
 ```
 
-为了增加用户体验，我想在输入完成后按回车就可以添加而不是去点击按钮，这要怎么做呢？也很简单，把之前的`<button>`删掉，只需要简单修改下输入框就好：
+为了增加用户体验，我想在输入完成后直接按回车就可以添加，而不是去麻烦的点击按钮，这要怎么做呢？也很简单，只需做一些简单修改就好了：
 
 ```typescript
 /* @file app/user-list.component.ts */
-<input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+const component = {
+  template: `
+  //... <button> 现在可以删掉了
+  <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+  //...
+  `
+}
 ```
 
 看吧，简直魔法一般。
 
-OK，接下来实现删除功能。同样的，先修改一些模板，这里只需要在每个`user`后面添加一个删除按钮就好：
+OK，接下来实现删除功能。同样的，先修改一下模板，要在每个`user`后面添加一个删除按钮：
 
 ```typescript
 /* @file app/user-list.component.ts */
-<li *ngFor="#user of users">
-  {{user.name}}
-  <button type="button" (click)="deleteUser(user)">删除</button>
-</li>
+const component = {
+  template: `
+    //...
+    <li *ngFor="#user of users">
+      {{user.name}}
+      <a (click)="deleteUser(user)">删除</a>
+    </li>
+    //...
+  `
+}
 ```
 
-和之前如出一辙，那么接下来就要实现`deleteUser`这个方法，注意这里给这个方法传入一个参数，就是对应的`user`。先来实现service里面的deleteUser吧：
+和之前的添加如出一辙，接下来实现`deleteUser`这个方法。注意这里给这个方法传入一个参数，就是对应的`user`。
+
+还是先来实现`service`里面的`deleteUser`：
 
 ```typescript
 /* @file app/user.service.ts */
-deleteUser(user: User): Promise<boolean> {
-  return Promise.resolve(true)
+export class UserService {
+  //...
+  deleteUser(deleteUser: User): Promise<boolean> {
+    let idx = this.users.indexOf(user)
+    this.users.splice(idx, 1)
+    return Promise.resolve(true)
+  }
+  //...
 }
 ```
 
@@ -822,38 +918,235 @@ deleteUser(user: User): Promise<boolean> {
 
 ```typescript
 /* @file app/user-list.component.ts */
-deleteUser(user: User): void {
-  this._service.deleteUser(user).then(() => {
-    let idx = this.users.findIndex(userItem => userItem.id === user.id)
-    this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
-  })
+export class UserListComponent implements OnInit {
+  //...
+  deleteUser(user: User): void {
+    this._service.deleteUser(user)
+  }
+  //...
 }
 ```
 
-恩，这个也比较好理解，传入的参数就是前边提到的`user`，然后找到了`user`在`users`中的位置，用到了`findIndex`：
-
-```typescript
-[1, 2, 3].findIndex(n => n === 2) //=> 1
-```
-
-找到`index`就可以用`slice`函数将数组在`index`处切开，然后把前边和后边的片段用`concat`拼起来，这样就实现了删除。
-
 试一下功能，OK，木有问题。
 
-好吧，一鼓作气，来继续实现修改功能。还是先来愉快的修改模板：
+# 还不到休息的时候，还要再接再厉
+
+很好，一鼓作气实现了增加和删除功能。也对`service`有了一个大概的了解。接下来就来继续实现修改功能。
+
+大致模板应该是这样的：
 
 ```typescript
 /* @file app/user-list.component.ts */
-<li *ngFor="#user of users">
-  <span *ngIf="!user.isEdit">{{user.name}}</span>
-  <input *ngIf="user.isEdit" [(ngModel)]="user.name" />
-  <button type="button" (click)="updateUser(user)">
-    <span *ngIf="!user.isEdit">修改</span>
-    <span *ngIf="user.isEdit">完成</span>
-  </button>
-  <button type="button" (click)="deleteUser(user)">删除</button>
-</li>
+const component = {
+  template: `
+    <li *ngFor="#user of users">
+      <span *ngIf="!isEdit">{{user.name}}</span>
+      <input *ngIf="isEdit" />
+      <a *ngIf="!isEdit" (click)="beginEdit()">修改</a>
+      <a *ngIf="isEdit" (click)="endEdit()"></a>
+      <a (click)="deleteUser(user)">删除</a>
+    </li>
+  `
+}
 ```
+
+功能可以描述为，有一个属性`isEdit`用来控制是否启用修改，启用则显示为输入框，不启用则显示普通姓名。下面的按钮也是同样的，`beginEdit()`用来将`isEdit`设置成`true`，`endEdit`则相反。
+
+那么问题来了，`isEdit`从哪来？难道要为每个`user`再扩展一个`isEdit`属性么？
+
+```typescript
+/* @file app/user.service.ts */
+interface User {
+  id: number
+  name: string
+  isEdit? : boolean
+}
+```
+
+属性后面的`？`表示这是一个可选属性。这么做当然可以，但是现在我想要根据这些内容再创建一个组件，就叫他`UserItemComponent`吧。
+
+新建`app/user-item.component.ts`：
+
+```typescript
+/* @file app/user-item.component.ts */
+import { Component } from 'angular2/core'
+
+const component = {
+    selector: 'user-item',
+    template: `
+      <span *ngIf="!isEdit">{{user.name}}</span>
+      <input *ngIf="isEdit" />
+      <a *ngIf="!isEdit" (click)="beginEdit()">修改</a>
+      <a *ngIf="isEdit" (click)="endEdit()">完成</a>
+    `
+}
+
+@Component(component)
+export class UserItemComponent { }
+```
+
+之前的模板内容移了过来。现在首要先做的是在`UserListComponent`中将他显示出来，还记得我们是怎么往`AppComponent`中塞`<user-list>`的么？
+
+```typescript
+/* @file app/user-list.component.ts */
+import { UserItemComponent } from './user-item.component'
+
+const component = {
+  //...
+  directives: [UserItemComponent],
+  template: `
+    //...
+    <li *ngFor="#user of users">
+      <user-item></user-item>
+      <a (click)="deleteUser(user)">删除</a>
+    </li>
+    //...
+  `
+}
+```
+
+接下来要把`li`上的`user`传给`<user-item>`，这需要做两件事：
+
+1. 模板中将`user`作为一个属性传递；
+2. 在`UserItemComponent`中声明`user`是由外部传入的属性
+
+两个组件都要进行相应的修改：
+
+```typescript
+/* @file app/user-list.component.ts */
+const component = {
+  //...
+  template: `
+    //...
+    <user-item [user]="user"></user-item>
+    //...
+  `
+}
+```
+
+还有
+
+```typescript
+/* @file app/user-item.component.ts */
+import { Component, Input } from 'angular2/core'
+
+export class UserItemComponent {
+    @Input()
+    user
+}
+```
+
+又一个注解，这个要好理解一些，`@Input`注释的属性表示由外部提供。
+
+接下来就来实现我们的`beginEdit`和`endEdit`方法，这里还需要一个属性来表示输入框中的值，就用`username`好了：
+
+```typescript
+/* @file app/user-item.component.ts */
+import { Component, OnInit, Input } from 'angular2/core'
+
+const component = {
+  //...
+  template: `
+    //...
+    <input *ngIf="isEdit" [(ngModel)]="username" />
+    //...
+  `
+}
+
+export class UserItemComponent implements OnInit {
+  //...
+  username: string
+  isEdit: boolean = false
+
+  beginEdit() {
+    this.isEdit = true
+  }
+
+  endEdit() {
+    this.isEdit = false
+  }
+
+  ngOnInit() {
+    this.username = this.user.name
+  }
+}
+```
+
+在初始化时给`username`，赋了初值，这样就不至于输入框为空。
+
+然后，我们要怎么保存结果呢？？？:scream:
+
+方法有很多，但我想聊聊ng2的又一个注解，`@Output`。让我们先来完成`service`中的`UserService#updateUser`方法：
+
+```typescript
+/* @file app/app.service.ts */
+export class UserService {
+  //...
+  updateUser(user: User, username: string): Promise<boolean> {
+    let idx = this.users.indexOf(user)
+    this.users[idx].name = username
+    return Promise.resolve(true)
+  }
+}
+```
+
+逻辑很简单，就是简单的替换。再来把列表组件`UserListComponent`的`UserListComponent#updateUser`实现：
+
+```typescript
+/* @file app/user-list.component.ts */
+export class UserListComponent implements OnInit {
+  //...
+  updateUser(user: User, username: string): void {
+    this._service.updateUser(user, username)
+  }
+  //...
+}
+```
+
+好了，万事具备，轮到`@Output`登场了，不过在这之前，我还想让你看一样东西:joy:：
+
+```jsx
+class UserList extends React.Component {
+  OnUpdateUser() {
+    // do something
+  }
+  render() {
+    return (
+      <user-item onUpdate={OnUpdateUser}  />
+    )
+  }
+}
+```
+
+还记得这个么？在react中，我们把方法名传给子组件，在子组件中调用父组件的方法。如果记忆犹新的话，那就来看看ng2的做法吧：
+
+```typescript
+/* @file app/user-list.component.ts */
+const component = {
+  template: `
+    <user-item [user]="user" (updateUser)="updateUser(user, $event)"></user-item>
+  `
+}
+```
+
+```typescript
+/* @file app/user-item.component.ts */
+export class UserItemComponent implements OnInit {
+  //...
+  @Output(this.user)
+  updateUser = new EventEmitter<string>()
+  //...
+  endEdit() {
+    this.isEdit = false
+    this.updateUser.next(this.username)
+  }
+  //...
+}
+```
+
+
+
+
 
 这里需要依赖`user`的`isEdit`属性，还木有怎么办。这有点棘手，需要修改一些地方。首先要修改一下新增方法`createUser`，在新增时给`user.isEdit`加一个默认值`false`：
 
@@ -1675,7 +1968,7 @@ interface Point {
 }
 ```
 
-在js中函数也是类型，他可以赋给变量，所以在Interface中也可以有函数的表示：
+在js中，函数也是一个类型，在Interface中也有函数的表示：
 
 ```typescript
 interface toUpperCaseFunc {
@@ -1688,3 +1981,5 @@ let toUpperCase: toUpperCaseFunc = function(str) {
 ```
 
 这是一个把字符串变成大写的函数，Interface里括号中的内容是参数和他的类型，后边部分是返回值的类型。
+
+
