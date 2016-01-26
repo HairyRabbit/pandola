@@ -915,7 +915,7 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-因为绑定的存在，不需要去管`UserListComponent#users`的值，他会自己更新。当然，`username`为空时没什么暖用，要过滤掉。
+`username`为空时没什么暖用，要过滤掉。
 
 来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定的威力。不过好像少写了一些东西，添加成功后，要把`username`的值清空，这个简单：
 
@@ -938,9 +938,9 @@ export class UserListComponent implements OnInit {
 /* @file app/user-list.component.ts */
 const component = {
   template: `
-  //... <button> 现在可以删掉了
-  <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
-  //...
+    //... <button> 现在可以删掉了
+    <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+    //...
   `
 }
 ```
@@ -1362,6 +1362,117 @@ const component = {
 
 给你三分钟时间休息，后面还有更重要的内容等着你。
 
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { User, UserService } from './user.service'
+import { UserItemComponent } from './user-item.component'
+
+const component = {
+  selector: 'user-list',
+  directives: [UserItemComponent],
+  templateUrl: 'app/user-list.component.html'
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+  constructor(private _service: UserService) {}
+
+  users: User[]
+  username: string = ''
+
+  getUsersCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+
+  createUser(): void {
+    if(!this.username.trim()) return
+    let resetUserName = () => this.username = ''
+    this._service.createUser(this.username).then(resetUserName)
+  }
+
+  deleteUser(user: User): void {
+    this._service.deleteUser(user)
+  }
+
+  updateUser(user: User, username: string): void {
+    this._service.updateUser(user, username)
+  }
+
+  ngOnInit() {
+    this._service.getUsers().then(users => this.users = users)
+  }
+}
+```
+
+```html
+<!-- @file app/user-list.component.html -->
+<div>
+  <label>
+    添加新用户
+    <input type="text" [(ngModel)]="username" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+  </label>
+  <p>要添加的用户为：{{username}}</p>
+</div>
+<div *ngIf="getUsersCount()">
+  <ul>
+    <li *ngFor="#user of users">
+      <user-item [user]="user" (updateUser)="updateUser(user, $event)"></user-item>
+      <a (click)="deleteUser(user)">删除</a>
+    </li>
+  </ul>
+  <p>用户的数量是：{{getUsersCount()}}</p>
+</div>
+<div *ngIf="!getUsersCount()">
+  <p>木有用户(°Д°)</p>
+</div>
+```
+
+```typescript
+/* @file app/user-item.component.ts */
+import { Component, OnInit, EventEmitter, Input, Output } from 'angular2/core'
+
+const component = {
+  selector: 'user-item',
+  templateUrl: 'app/user-item.component.html'
+}
+
+@Component(component)
+export class UserItemComponent implements OnInit {
+
+  @Input()
+  user
+
+  @Output(this.user)
+  updateUser = new EventEmitter<string>()
+
+  username: string
+  isEdit: boolean = false
+
+  beginEdit() {
+    this.isEdit = true
+  }
+
+  endEdit() {
+    this.isEdit = false
+    this.updateUser.next(this.username)
+  }
+
+  ngOnInit() {
+    this.username = this.user.name
+  }
+}
+```
+
+```html
+<!-- @file app/user-item.component.html -->
+<span *ngIf="!isEdit">{{user.name}}</span>
+<input *ngIf="isEdit" [(ngModel)]="username" />
+<a *ngIf="!isEdit" (click)="beginEdit()">修改</a>
+<a *ngIf="isEdit" (click)="endEdit()">完成</a>
+```
+
 [回到顶部](#)
 
 # 当然，还有重要的东西没有说
@@ -1407,7 +1518,9 @@ export class AppComponent {}
 
 有点多，来依次看看。
 
-在`app/boot.ts`中，引入了`ROUTER_PROVIDERS`，用来将路由注入到组件中。在`app/app.component.ts`引入了`RouteConfig`和`ROUTER_DIRECTIVES`。`RouteConfig`就是你所看到的`@RouteConfig`注解，而`ROUTER_DIRECTIVES`是模板中的`<router-outlet>`，作用是占位符，之前的`<user-list>`现在可以去掉了。接下来：
+在`app/boot.ts`中，引入了`ROUTER_PROVIDERS`，用来将路由注入到组件中。在`app/app.component.ts`引入了`RouteConfig`和`ROUTER_DIRECTIVES`。`RouteConfig`就是你所看到的`@RouteConfig`注解，而`ROUTER_DIRECTIVES`是模板中的`<router-outlet>`，作用是占位符。
+
+之前的`<user-list>`现在可以去掉了。接下来：
 
 ```typescript
 const router: RouteDefinition[] = [
@@ -1522,11 +1635,39 @@ const component = {
 }
 ```
 
-来试试我们的新功能吧。Ok，可以来回跳转，但是，详细页的数据要怎么显示？
+来试试我们的新功能吧。
+
+<img src="ng2/ng2-route-1.png" title="ng2 route 1." />
+<img src="ng2/ng2-route-2.png" title="ng2 route 2." />
+
+Ok，可以来回跳转，但是，详细页的数据要怎么显示？
+
+```typescript
+/* @file app/user-detail.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { ROUTER_DIRECTIVES } from 'angular2/router'
+
+const component = {
+  selector: 'user-detail',
+  directives: [ROUTER_DIRECTIVES],
+  templateUrl: 'app/user-detail.component.html'
+}
+
+@Component(component)
+export class UserDetailComponent {}
+```
+
+```html
+<!-- @file app/user-detail.component.html -->
+<h2>User Detail</h2>
+<a [routerLink]="['UserList']">返回</a>
+```
+
+[回到顶部](#)
 
 # 恩，这确实是个难点
 
-接下来还剩下最后一个功能，就是在详细页面显示出用户的姓名。
+接下来还剩下我们的最后一个功能，就是在详细页面显示出用户的姓名。
 
 因为路由中动态段中有`id`，所以最简单的办法就是取这个`id`，然后在`service`中取得对应`id`的`user`。
 
@@ -1560,7 +1701,7 @@ export class UserService {
 }
 ```
 
-现在你应该已经习惯ts的写法了。然后要做的就是在组件中赋值给一个属性：
+现在你应该已经习惯ts的写法。然后要做的就是在组件中赋值给一个属性：
 
 ```typescript
 /* @file app/user-detail.component.ts */
@@ -1589,6 +1730,10 @@ export class UserDetailComponent implements OnInit {
 
 Ok，来试试看。
 
+<img src="ng2/ng2-route-3.png" title="ng2 route 3." />
+
+[回到顶部](#)
+
 # 回归主题，新年快乐！
 
 我们的ng2之旅要告一段落了，但这还只是刚刚开始。相对于react和ember2，他们各自都有优缺点。
@@ -1602,6 +1747,10 @@ Ok，来试试看。
 那么，新年快乐(｡◕‿◕｡)，bye ~
 
 And See you again.:two_hearts:
+
+<img src="ng2/profile.jpg" title="profile." />
+
+[回到顶部](#)
 
 # 附录，TypeScript 101
 
@@ -1908,4 +2057,8 @@ let test = id<string>('hello world')
 
 学习ts进一步可以提高对js的认知，并且能够写出优雅的代码。值得入手程度：:star2::star2::star2::star2::star2:
 
+[回到顶部](#)
+
 # 附录，ng2与RESTful
+
+@TODO
