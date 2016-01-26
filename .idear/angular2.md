@@ -14,19 +14,19 @@
 * [回归主题，新年快乐！](#回归主题，新年快乐！)
 * [附录，TypeScript 101](#附录，TypeScript 101)
 
-# 那么首先，祝大家新年快乐
+# 首先，祝大家新年快乐
 
 哦哈呦，那么首先，_Happy 2016 evenyone_:tada:。
 
 我是来给大家拜年的:raising_hand:。
 
-2015年大家玩的怎样？**react**是不是已经6到爆炸，**webpack**是不是已经轻松拿下。仔细回想一下，前端变化也算是翻天覆地的，[react](https://github.com/facebook/react)，[webpack](https://github.com/webpack/webpack)，[ember2](https://github.com/emberjs/ember.js)，[redux](https://github.com/rackt/redux)……真是超多东西需要学习。
+2015年大家玩的怎样？**react**是不是已经6到爆炸，**webpack**是不是也已经轻松拿下。仔细回想一下，前端变化也算是翻天覆地的，[react](https://github.com/facebook/react)，[webpack](https://github.com/webpack/webpack)，[ember2](https://github.com/emberjs/ember.js)，[redux](https://github.com/rackt/redux)……真是超多东西需要学习。
 
 之前的圣诞元旦腊八节也没有送大家礼物，在苦思冥想之后，我决定为大家送上这个。
 
 没错，这次又来带大家踩坑了。
 
-2016，不如来看下**ng2**吧。
+2016，不如我们来看下**ng2**吧。
 
 [回到顶部](#)
 
@@ -1547,6 +1547,28 @@ interface Point {
 }
 ```
 
+除了普通变量外，还可以有数组属性：
+
+```typescript
+interface People {
+  [index: number]: string
+}
+
+interface People {
+  [index: string]: string
+}
+```
+
+与单个属性不同的是，集合属性除了声明数组内元素的属性外，还必须声明索引的签名。也就是说，上面的例子分别匹配下面的数组：
+
+```typescript
+["foo", "bar"]
+
+{ "0": "foo", "1": "bar" }
+```
+
+索引的签名只能是`number`或`string`。
+
 在js中，函数也是一个类型，在Interface中也有函数的表示：
 
 ```typescript
@@ -1561,3 +1583,163 @@ let toUpperCase: toUpperCaseFunc = function(str) {
 
 这是一个把字符串变成大写的函数，Interface里括号中的内容是参数和他的类型，后边部分是返回值的类型。
 
+## 类
+
+类是面向对象语言的基石，而类最主要的功能就是实例出对象，并且类之间可被继承。
+
+js中的类不同于其他面向对象语言，js的继承属于原型链接，而类也只是一个语法糖而已。
+
+`class`关键字用于定义类：
+
+```typescript
+class Car {
+  color: string
+  constructor(color: string) {
+    this.color = color
+  }
+}
+
+let car = new Car('red')
+```
+
+`constructor`是类的构造方法，之后我们可以用`new`操作符实例出一个对象。
+
+类有两种成员，静态成员和实例成员，用关键字`static`修饰：
+
+```typescript
+class Car {
+  static didi() {
+    console.log('dididi!!!')
+  }
+  run() {
+    console.log('wuwuwu~~~')
+  }
+}
+```
+
+在调用静态方法时，只能使用类名来调用，`Car.didi()`；而实例方法需要在实例化成对象后调用，`(new Car()).run()`。
+
+类还可以继承，这要使用`extends`关键字：
+
+```typescript
+class Car {
+  color: string
+  constructor(color: string) {
+    this.color = color
+  }
+  
+  run() {
+    console.log('wuwuwu~~~')
+  }
+}
+
+class Lamborghini extends Car {
+  constructor() {
+    super('white')
+  }
+}
+
+let lambo = new Lamborghini()
+lambo.run() //=> 'wuwuwu~~~'
+```
+
+这样我们就创建了一个新的车，兰博基尼，他继承自父类Car。
+
+子类需要在构造函数中使用`super`关键字调用父类的构造方法。
+
+类有三种访问修饰符：`public`，`private`，`protected`。在ts中，声明的属性和方法，默认都是`public`，也就是开放的。被`private`修饰的属性或方法，不能够用于外部：
+
+```typescript
+class Car {
+  color: string
+  constructor(color: string) {
+    this.color = color
+  }
+  
+  run() {
+    console.log('wuwuwu~~~')
+  }
+  
+  private fly() {
+    console.log('fly away~')
+  }
+}
+
+let cat = new Car('red')
+cat.run() //=> 'wuwuwu~~~'
+cat.fly() //=> Error!
+```
+
+`protected`和`private`类似，但于此不同的是，`protected`修饰的属性在继承的子类中可以被访问：
+
+```typescript
+class Car {
+  protected color: string
+  constructor(color: string) {
+    this.color = color
+  }
+}
+
+class Lamborghini extends Car {
+  constructor() {
+    super('white')
+  }
+  
+  say() {
+    console.log(`my color is ${this.color}`)
+  }
+}
+
+let lambo = new Lamborghini()
+lambo.say() //=> 'my color is white'
+lambo.color //=> Error!
+```
+
+## 泛型
+
+先来看一个例子：
+
+```typescript
+function id(x: number): number {
+  return x
+}
+```
+
+函数`id`接受一个数字x，并直接返回。但这个函数不具备一般性，如果我想传入一个`string`而不是`number`，应该怎么做？将类型改为`any`或许可以：
+
+```typescript
+function id(x: any): any {
+  return x
+}
+```
+
+这里虽然解决了任意类型的问题，但是无法约束返回值的类型就是传入参数的类型。这时我们可以使用泛型：
+
+```typescript
+function id<T>(x: T): T {
+  return x
+}
+```
+
+`T`成为泛型变量，他并不是一个我们平常意义上的变量，而是一个类型变量。他的作用是根据传入参数的值来决定T的类型。比如我们给id传入一个`number`，那么id就是一个传入`number`并返回`number`的函数。T的位置会被具体类型代替。当然，我们也可以明确的指定泛型变量的类型：
+
+```typescript
+let test = id<string>('hello world')
+```
+
+## 还差什么
+
+这里只是简单介绍了TypeScript中的一些功能。总而言之，ts是js的超集，他给予js一个类型系统来减少错误的发生，同时提供了大部分es6/es7特性。
+
+这里的介绍还是太过于简单，接下来可以去参考官方文档：
+
+[TypeScript handbook](http://www.typescriptlang.org/Handbook)
+[TypeScript lang spec](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)
+
+当然还有一些中文资源：
+
+[TypeScript Handbook（中文版）](https://zhongsp.gitbooks.io/typescript-handbook/content/)
+
+学习ts进一步可以提高对js的认知，并且能够写出优雅的代码，值得入手。:star2::star2::star2::star2::star2:
+
+# 附录，ng2与RESTful
