@@ -329,11 +329,13 @@ const component = {
 
 `selector`的值就是本节开始时看到的标签`my-app`，他用来定义标签的名字；`template`就是要显示的内容，称为**模板**:rabbit:。
 
-我猜你会第一眼看到`@Component`，他太特别了。这是一个注解，如果熟悉java，一定不会陌生，然而这里的注解很简单，他也是一个语法糖。`@Component`可以简单理解为`Component(component)(AppComponent)`，一个函数的调用。当然，这里理解为**AppComponent是一个ng2组件显然更好**，除了增加颜值，还能直观的看到组件类的特性。之后也会遇到一些其他注解。
+我猜你会第一眼看到`@Component`，因为他太特别了。
 
-有了AppComponent组件还不能马上看到效果，因为还没有启动（安装）。
+这是一个注解，如果熟悉java，一定不会陌生，然而这里的注解很简单，他也是一个语法糖。`@Component`可以简单理解为`Component(component)(AppComponent)`，一个函数的调用。当然，这里理解为**AppComponent是一个ng2组件显然更好**，除了增加颜值，还能直观的看到组件类的特性。之后也会遇到更多注解。
 
-新建一个`app/boot.ts`：
+有了AppComponent组件还不能马上看到效果，因为还没有启动（安装）。:joy:
+
+现在新建一个`app/boot.ts`：
 
 ```typescript
 /* @file app/boot.ts */
@@ -345,17 +347,19 @@ bootstrap(AppComponent)
 
 这就是启动方式，现在可以不用理解`bootstrap`到底做了什么。保存片刻之后浏览器自动刷新，会看到大大的**Hello World**:joy:。
 
-接下来摆弄一下强大的模板。
+很简单，接下来摆弄一些模板。
 
 [回到顶部](#)
 
 # 没错，模板最大
 
-展示模板的最好方法就是做一个列表，然后再花样显示上去。
+展示模板最好的方法就是做一个列表，然后再花样显示上去。
 
-Hello World就让他留在那里吧。我们计划实现一个用来显示用户姓名的简单列表。
+Hello World就让他留在那里吧。我们来实现一个用于显示用户姓名的简单列表。
 
-还是先来新建一个组件，给他取名`UserListComponent`我想就很合适。新建文件`app/user-list.component.ts`。之前在命名`app/app.component.ts`时说到了命名规范，这里再加一条，词组的话用`-`来连接每个单词，就像上面那样：
+接下来还是先来新建组件，给他取名为`UserListComponent`。
+
+新建文件`app/user-list.component.ts`。之前在命名`app/app.component.ts`时说到了命名规范，这里再加一条，词组的话用`-`来连接每个单词，就像上面那样：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -394,9 +398,11 @@ const USERS: User[] = [
 ]
 ```
 
-有新东西，`interface`。在解释之前还是先浏览一下代码内容。与`app/app.component.ts`不同的是，第一行除了导入`Component`外，还导入了`OnInit`，这是一个接口，也就是`interface`。
+有新东西，`interface`。
 
-`interface`接口是ts中的扩展内容，如果你有其他oop编程经验那么肯定不会对接口感到陌生。接口可以表现为对行为的一种约束，就是说如果"xxx实现了某种接口，那么xxx必然具备这个接口的所有内容"。看一下这行代码：
+在解释之前还是先浏览一下代码内容。与`app/app.component.ts`不同的是，第一行除了导入`Component`外，还导入了`OnInit`，这是一个ng2的接口，也就是被称为`interface`的东西。
+
+`interface`接口是ts中的扩展内容，如果你有其他oop编程经验那么肯定不会对接口感到陌生。接口可以表现为对行为的一种约束（封装），就是说如果"xxx实现了某种接口，那么xxx必然具备这个接口的所有内容"。看一下这行代码：
 
 ```typescript
 export class UserListComponent implements OnInit {
@@ -407,7 +413,7 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-这句话可以翻译为“实现了`OnInit`接口的`UserListComponent`类”。既然要实现这个接口，必然也要实现接口里面的内容，那就是`ngOnInit`方法，因为`ngOnInit`方法定义在`OnInit`接口中。这个方法会在初始化该类时调用，所以可以写一些自己的逻辑在里面，比如赋值操作：
+上面这段可以翻译为“实现了`OnInit`接口的`UserListComponent`类”。既然要实现这个接口，必然也要实现接口里面的内容，那就是`ngOnInit`方法，因为`ngOnInit`方法定义在`OnInit`接口中。这个方法会在初始化该类时调用，所以可以写一些自己的逻辑在里面，如赋初值操作。
 
 ```typescript
 //...
@@ -418,7 +424,7 @@ ngOnInit() {
 //...
 ```
 
-如果感觉很抽象，再看看这个会好一些：
+如果对于`interface`感觉很抽象，再看看这个会好一些：
 
 ```typescript
 interface User {
@@ -427,7 +433,7 @@ interface User {
 }
 ```
 
-这是我们自定义的接口，`OnInit`是ng2已经定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必须要求包括这两个属性。再来看看最后几行代码：
+这里更直接一些，这是我们自定义的接口，`OnInit`是ng2已经定义好的接口。这里定义了`User`接口，他包括了两个属性：`id`和`name`，并且在属性后面指明了他们的类型。那就是说，但凡实现`User`接口的东西必须要求包括这两个属性。再来看看最后几行代码：
 
 ```typescript
 const USERS: User[] = [
@@ -437,7 +443,7 @@ const USERS: User[] = [
 ]
 ```
 
-这里定义了一些静态测试数据，注意他的类型签名，是`User[]`，他表示`USERS`是一个`User`数组。显然他的数据格式已经包括了`id`和`name`，否则编译器会报错。
+这里定义了一些静态测试数据，注意他的类型签名，是`User[]`，他表示`USERS`是一个`User`数组。显然他的数据格式已经包括了`id`和`name`，否则ts编译器会抱怨，充分验证了上面的内容。
 
 当然，除了显眼的`Interface`外，还有一样东西也格外引人入目，那就是`template`，也是本节的主角，模板。
 
@@ -478,9 +484,9 @@ emberjs:
 </ul>
 ```
 
-`selector: user-list`之前已经解释过，稍后就会看到他的用处。
+`selector: ‘user-list’`之前已经解释过，表示标签名称。
 
-这里还有一个很有意思的es6特性，那就是模板字符串**Template String**。与普通字符串不同，他用 **`** 符号把内容括起来，当然还有一个更厉害的功能：
+这里还有一个很有意思的es6特性，那就是模板字符串**Template String**。与普通字符串不同，他用 **`** 符号把内容括起来。当然他还有一个很厉害的功能：
 
 ```js
 var foo = 'bar'
@@ -488,9 +494,9 @@ var oldStr = 'this is ' + foo + 'template string'
 var newStr = `this is ${foo} template string`
 ```
 
-效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。更重要的一点是，他支持多行文本，这样就不需要在字符串末尾使用`+`号拼接了。ng2充分利用了这个特性，你都看到了。
+效果是一样的。没有模板字符串，就只能用老办法拼接字符串或是用replace替换，这样做使得代码颜值很低而且容易出错。相反，模板字符串是一个优雅的做法，他可以将`${var}`中的内容替换成变量。更重要的一点，他支持多行文本，这样就不需要在字符串末尾使用`+`号拼接了。ng2充分利用了这个特性，你都已经看到了。
 
-还有重要的一点没有说，模板里的`users`是从哪来的？我想你应该已经找到了，他定义在组件类中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了值。
+还有重要的一点没有说，模板里的`users`是从哪来的？我想你应该已经找到了，他定义在组件类`UserListComponent`中，注意他的签名，是`User[]`。而后在`UserListComponent#ngOnInit`中给他赋了初值。
 
 接下来要做的工作就是把这个组件塞到之前的`app/app.component.ts`的`template`里：
 
@@ -509,17 +515,21 @@ const component = {
 
 首先在页面顶部先把组件用`import`导入。
 
-有个问题，ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`directives`的值是一个数组，里面存放我们想要使用的组件。
+有个问题，ng2并不认识`<user-list>`，要想使用他，必须声明`directives`。`directives`的值是一个数组，里面存放这我们用到的组件。
 
-这里要思考的一点是，想要使用我们自定义的组件，就必须明确告诉ng2，做法就是务必写在`directives`中。同时，组件就是一个`directive`。
+我们还要思考的一点是，想要使用我们自定义的组件，就必须明确告诉ng2，做法就是务必写在`directives`中。同时，组件就是一个`directive`。
 
 来看下效果吧，页面应该早就刷新好了。
+
+<img src="ng2/ng2-user-list.png" title="ng2 user list." />
 
 [回到顶部](#)
 
 # 感觉简单，就再来一些模板
 
-接下来想要实现一个功能，在没有用户即空列表时，显示一句话友好的告诉别人还没有用户；而在有用户时照常显示用户列表。要实现这个，需要if条件逻辑:
+太简单？来点难的。
+
+接下来我想实现一个功能，在没有用户即空列表时，显示一句话友好的告诉别人还没有用户；而在有用户时照常显示用户列表。要实现这个，需要if条件逻辑:
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -532,7 +542,6 @@ const component = {
           {{user.name}}
         </li>
       </ul>
-      <p>用户的数量是：{{getUsersCount()}}</p>
     </div>
     <div *ngIf="!getUsersCount()">
       <p>木有用户(°Д°)</p>
@@ -541,9 +550,9 @@ const component = {
 }
 ```
 
-`*ngIf`就是我们需要的，而功能的话也无需过多解释。等号后面相当于条件语句，这里是一个表达式`getUsersCount()`，说明他是一个方法，而且这个方法应该返回一个或能转换成`true`或`false`的值。
+`*ngIf`，又一个ng2指令，这就是我们需要的，而功能的话也无需过多解释。等号后面相当于条件语句，这里是一个表达式`getUsersCount()`，说明他是一个方法，而且这个方法应该返回一个或能转换成`true`或`false`的值，和js中的if语句一致。
 
-在组件类`UserListComponent`里添加一个`getUsersCount`方法：
+在组件类`UserListComponent`里添加一个`getUsersCount()`方法：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -573,17 +582,61 @@ const component = {
 }
 ```
 
-静态数据`USERS`已经没用了，把它删掉了。浏览器刷新后，会看到空列表模板。
+静态数据`USERS`此时已经没用了，把它删掉。
+
+浏览器刷新后，会看到空列表模板。
+
+<img src="ng2/ng2-empty-user-list.png" title="ng2 empty user list." />
 
 if模板和for模板应该是模板当中使用最多的，但显示一个列表未免也太显无聊了点。接下来做一些有意思的功能，比如增删改。
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { User, UserService } from './user.service'
+
+const component = {
+    selector: 'user-list',
+    template: `
+      <div *ngIf="getUsersCount()">
+        <ul>
+          <li *ngFor="#user of users">
+            {{user.name}}
+          </li>
+        </ul>
+        <p>用户的数量是：{{getUsersCount()}}</p>
+      </div>
+      <div *ngIf="!getUsersCount()">
+        <p>木有用户(°Д°)</p>
+      </div>
+    `
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+  constructor(private _service: UserService) {}
+  
+  users: User[]
+
+  getUsersCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+    
+  ngOnInit() {
+    if(!USERS) return
+    this.users = USERS
+  }
+}
+```
 
 [回到顶部](#)
 
 # 就是这个感觉，来点有意思的
 
-在开始之前先声明一点，静态数据`USERS`只是为了演示功能。在ng2里数据和组件应该隔离开，数据被放在叫做**service**的类里。
+在开始干活之前要先声明一点，静态数据`USERS`只是为了演示功能。在ng2里数据和组件应该隔离开，数据被放在叫做**service**的类里。
 
-试着把刚才的静态数据移到service里，新建一个文件`app/user.service.ts`:
+试着把刚才的静态数据移到`service`里，新建一个文件`app/user.service.ts`:
 
 ```typescript
 /* @file app/user.service.ts */
@@ -608,13 +661,13 @@ export class UserService {
 }
 ```
 
-快来看，我们遇到了第二个注解，`@Injectable`。于`@Component`类似，这个注解表明该类是可注入的。注意后边有一对括号，丢了他们ng2可不干。
+快来看，我们遇到了第二个注解：`@Injectable`。与`@Component`类似，这个注解表明该类是可注入的。注意后边有一对括号，丢了他们ng2可不干。
 
 `User`接口也被移到了这里，并用`export`导出。
 
 在`UserService`类的构造函数中赋给`users`属性初值，`[]`，一个空列表。
 
-同时`UserService`类中申明了一个`getUsers`方法，该方法用来获取用户数据。注意类型签名，一个泛型`Promise<Users[]>`，使用Promise是为了模拟从服务器端异步请求，后边可以直接换成**AJAX**。
+于此同时在`UserService`类中申明了一个`getUsers`方法，该方法用来获取用户数据。注意他的类型签名，一个泛型`Promise<Users[]>`，使用Promise是为了模拟从服务器端异步请求，后边可以直接换成**AJAX**。
 
 这样`app/user-list.component.ts`也要做一下小手术了：
 
@@ -654,7 +707,7 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-在构造函数中为属性赋值，这个模式太常见了，所以ts把他直接弄到构造函数中来简写了这个功能。
+在构造函数中为属性赋值，这个模式太常见了，所以ts把他直接弄到构造函数中来简化了这个功能。
 
 初始化方法也有点不同，用了`Promise`的写法：
 
@@ -669,7 +722,7 @@ export class UserListComponent implements OnInit {
 
 调用的就是service中的`UserService#getUsers`方法。
 
-`Promise`也是es6中的新特性，介绍他需要大量篇幅，这里就简单理解为带有一个上下文的容器。他的上下文就是不久之后的操作会成功或失败。Promise可以代替常见的回调写法，举个jQuery调用AJAX的栗子：
+`Promise`也是es6中的新特性，介绍他可能需要整本书了。这里可以简单理解为带有一个上下文的容器。他的上下文就是不久之后的操作会成功或失败。Promise可以代替常见的回调callback写法，举个jQuery调用AJAX的栗子：
 
 ```js
 $.ajax({
@@ -694,9 +747,9 @@ $.ajax({ url: '/api' })
  })
 ```
 
-如此所见，$.ajax返回了一个`Promise`，这个`Promise`可能成功或失败。`then`方法接受两个参数，分别代表了成功和失败时调用的函数。
+如你所见，下边的$.ajax返回了一个`Promise`，这个`Promise`可能成功或失败。`then`方法接受两个参数，分别代表了成功和失败时调用的函数。
 
-`Promise`强大的一个体现是可以链式调用，比如说：
+`Promise`的强大还体现链式调用上，比如说：
 
 ```js
 function map(fn) {
@@ -723,9 +776,9 @@ Promise.resolve([1, 2, 3])
 //=> Hello, 11 and Hello, 12 and Hello, 13
 ```
 
-Promise对处理异步流起到了非常重要的作用。
+实际上`Promise style`对处理异步流起到了非常重要的作用。
 
-更有意思的是后面的`users => this.users = user`这是什么呢？
+然后更有意思的是后面的`users => this.users = user`，这是什么鬼:sleepy:？
 
 这个写法是es6中的箭头函数，他可以写为：
 
@@ -740,9 +793,9 @@ this._service.getUsers().then(function(users) {
 
 悲剧的是，浏览器刷新后报错了，ng抱怨说没有提供`UserService`，为什么呢？
 
-在构造函数里声明`UserService`，只说明了一个问题，那就是这个类需要`UserService`。所以必须在某个地方提供他。猜猜要怎么做？
+在构造函数里声明`UserService`，只说明了一个问题，那就是这个类需要`UserService`，但也只说我需要他而已。所以还必须在某个地方提供他。猜猜在在哪里？
 
-如果猜到是在`AppComponent`类中，那么给你9.9分，剩下的0.1分不给你怕你膨胀。这里要修改一下`app/app.component.ts`：
+如果猜到是在`AppComponent`类中，那么给你9.9分，剩下的0.1分不给你怕你膨胀。没错，就在调用他的地方，这里要修改一下`app/app.component.ts`：
 
 ```typescript
 /* @file app/app.component.ts */
@@ -755,9 +808,9 @@ const component = {
 }
 ```
 
-`providers`就用来提供`service`的。
+`providers`就是用来提供`service`的。
 
-这样就可以了。接下来还是考虑实现增删改吧。
+这样就可以了。回归主题，接下来还是考虑实现增删改吧:joy:。
 
 [回到顶部](#)
 
@@ -799,7 +852,11 @@ export class UserListComponent implements OnInit {
 
 注意他的类型签名，`string`，而且给他赋了初值。
 
-现在就在里面输入一些字试试看吧。Amazing！绑定功能果然很强大。下面接着来实现添加用户，这需要给按钮绑定点击事件：
+现在就在里面输入一些字试试看吧。Amazing！绑定功能果然很强大。
+
+<img src="ng2/ng2-add-user.png" title="ng2 add user." />
+
+下面接着来实现添加用户，这需要给按钮绑定点击事件：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -858,9 +915,9 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-因为绑定的存在，不需要去管`UserListComponent#users`的值，他会自己更新。当然，`newUserName`为空时没什么暖用，要过滤掉。
+因为绑定的存在，不需要去管`UserListComponent#users`的值，他会自己更新。当然，`username`为空时没什么暖用，要过滤掉。
 
-来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定的威力。不过好像少写了一些东西，添加成功后，要把`newUserName`清空，这个简单：
+来试试看吧，输入一些字，然后点击确定。HOHO～全部都在变，这就是绑定的威力。不过好像少写了一些东西，添加成功后，要把`username`的值清空，这个简单：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -936,7 +993,102 @@ export class UserListComponent implements OnInit {
 }
 ```
 
+<img src="ng2/ng2-delete-user.png" title="ng2 delete user." />
+
 试一下功能，OK，木有问题。
+
+```typescript
+/* @file app/user-list.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { User, UserService } from './user.service'
+
+const component = {
+    selector: 'user-list',
+    template: `
+      <div>
+        <label>
+          添加新用户
+          <input type="text" [(ngModel)]="username" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+        </label>
+        <p>要添加的用户为：{{username}}</p>
+      </div>
+      <div *ngIf="getUsersCount()">
+        <ul>
+          <li *ngFor="#user of users">
+            {{user.name}}
+            <a (click)="deleteUser(user)">删除</a>
+          </li>
+        </ul>
+        <p>用户的数量是：{{getUsersCount()}}</p>
+      </div>
+      <div *ngIf="!getUsersCount()">
+        <p>木有用户(°Д°)</p>
+      </div>
+    `
+}
+
+@Component(component)
+export class UserListComponent implements OnInit {
+  constructor(private _service: UserService) {}
+  
+  users: User[]
+  username: string = ''
+
+  getUsersCount(): number {
+    if(!this.users) return 0
+    return this.users.length
+  }
+  
+  createUser(): void {
+    if(!this.username.trim()) return
+    let resetUserName = () => this.username = ''
+    this._service.createUser(this.username).then(resetUserName)
+  }
+
+  deleteUser(user: User): void {
+    this._service.deleteUser(user)
+  }
+    
+  ngOnInit() {
+    this._service.getUsers().then(users => this.users = users)
+  }
+}
+```
+
+```typescript
+/* @file app/user.service.ts */
+import { Injectable } from 'angular2/core'
+
+export interface User {
+  id: number
+  name: string
+}
+
+@Injectable()
+export class UserService {
+  constructor() {
+    this.users = []
+  }
+
+  users: User[]
+
+  getUsers(): Promise<User[]> {
+    return Promise.resolve(this.users)
+  }
+
+  createUser(username: string): Promise<boolean> {
+    let user = { id: +new Date(), name: username }
+    this.users.push(user)
+    return Promise.resolve(true)
+  }
+
+  deleteUser(user: User): Promise<boolean> {
+    let idx = this.users.indexOf(user)
+    this.users.splice(idx, 1)
+    return Promise.resolve(true)
+  }
+}
+```
 
 [回到顶部](#)
 
@@ -944,7 +1096,7 @@ export class UserListComponent implements OnInit {
 
 很好，一鼓作气实现了增加和删除功能。也对`service`有了一个大概的了解。接下来就来继续实现修改功能。
 
-大致模板应该是这样的：
+我想大致模板应该是这样的：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -961,9 +1113,9 @@ const component = {
 }
 ```
 
-功能可以描述为，有一个属性`isEdit`用来控制是否启用修改，启用则显示为输入框，不启用则显示普通姓名。下面的按钮也是同样的，`beginEdit()`用来将`isEdit`设置成`true`，`endEdit`则相反。
+功能可以描述为，有一个属性`isEdit`用来控制是否启用修改，启用则显示为输入框，不启用则显示普通姓名。下面的按钮也是同样的，`beginEdit()`用来将`isEdit`设置成`true`，`endEdit()`作用相反。
 
-那么问题来了，`isEdit`从哪来？难道要为每个`user`再扩展一个`isEdit`属性么？
+那么问题来了，`isEdit`从哪里来？难道要为每个`user`再扩展一个`isEdit`属性么？
 
 ```typescript
 /* @file app/user.service.ts */
@@ -996,7 +1148,7 @@ const component = {
 export class UserItemComponent { }
 ```
 
-之前的模板内容移了过来。现在首要先做的是在`UserListComponent`中将他显示出来，还记得我们是怎么往`AppComponent`中塞`<user-list>`的么？
+之前的模板内容移了过来。现在首要先做的是在`UserListComponent`中将他显示出来，还记得我们是怎么往`AppComponent`中塞`<user-list>`的么？没错，`directives`。
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -1018,7 +1170,7 @@ const component = {
 
 接下来要把`li`上的`user`传给`<user-item>`，这需要做两件事：
 
-1. 模板中将`user`作为一个属性传递；
+1. 模板中将`user`作为一个属性传递给`UserItemComponent`；
 2. 在`UserItemComponent`中声明`user`是由外部传入的属性
 
 两个组件都要进行相应的修改：
@@ -1049,7 +1201,7 @@ export class UserItemComponent {
 
 又一个注解，这个要好理解一些，`@Input`注释的属性表示由外部提供。
 
-接下来就来实现我们的`beginEdit`和`endEdit`方法，这里还需要一个属性来表示输入框中的值，就用`username`好了：
+接下来就来实现我们的`beginEdit`和`endEdit`方法，这里还需要一个属性来表示输入框中的值，就还用`username`好了：
 
 ```typescript
 /* @file app/user-item.component.ts */
@@ -1114,7 +1266,7 @@ export class UserListComponent implements OnInit {
 }
 ```
 
-好了，万事具备，轮到`@Output`登场了，不过在这之前，我还想让你看一样东西:joy:：
+好了，万事具备，轮到`@Output`登场了，稍等……在这之前，我还想让你看一样东西:joy:：
 
 ```jsx
 class UserList extends React.Component {
@@ -1154,10 +1306,9 @@ export class UserItemComponent implements OnInit {
   //...
 }
 ```
-
 大体功能就是这般，在父组件模板中传入一个`$event`，来表示回传的值。子组件用`this.updateUser.next(this.username)`来传递，在这之前要先用`@output`注解表示`updateUser`是一个“可输出”的方法。
 
-这是我们观察到`UserListComponent`中的`template`规模已经不小了，而且手拼标签简直是丧心病狂，这里告诉你一个好玩的功能，那就是用`templateUrl`来代替`template`。
+这时我们观察到`UserListComponent`中的`template`规模已经不小了，而且手拼标签简直是丧心病狂。这里告诉你一个好玩的功能，那就是用`templateUrl`来代替`template`。
 
 首先新建一个文件`app/user-list.component.html`，将`template`中的内容复制过去：
 
@@ -1184,7 +1335,7 @@ export class UserItemComponent implements OnInit {
 </div>
 ```
 
-在组件中改为：
+在组件中把`template`改为：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -1205,7 +1356,11 @@ const component = {
 
 组件中的处理方法相同。
 
-浏览器刷新后试下功能，Ok。给你三分钟时间休息，后面还有更重要的内容等着你。
+浏览器刷新后试下功能，Ok。
+
+<img src="ng2/ng2-update-user.png" title="ng2 update user." />
+
+给你三分钟时间休息，后面还有更重要的内容等着你。
 
 [回到顶部](#)
 
