@@ -1369,374 +1369,75 @@ const component = {
 要取得地址栏中的`id`，我们需要用到`RouteParams`。修改组件`UserDetailComponent`：
 
 ```typescript
+/* @file app/user-detail.component.ts */
+import { Component, OnInit } from 'angular2/core'
+import { RouteParams, ROUTER_DIRECTIVES } from 'angular2/router'
 
+export class UserDetailComponent implements OnInit {
+  constructor(private _params: RouteParams) {}
+
+  ngOnInit() {
+    let id = +this._params.get('id')
+  }
+}
 ```
 
-
-
-详细页的数据要怎么显示？这有点棘手，原因是并没有保存过任何创建的`user`。看来首先要做的就是保存`users`，怎么做呢？
-
-修改`app/user.service.ts`：
+在初始化组件时，通过`this._params.get`方法获取到了id。接下来应该转到`service`中实现获取单个用户的方法：
 
 ```typescript
 /* @file app/user.service.ts */
 export class UserService {
-  constructor() { this.users = [] }
-
-  users: User[]
-}
-```
-
-注意他的类型签名，用一个`users`属性来保存创建的users。这样一来，创建方法`UserService#createUser`，也需要修改：
-
-```typescript
-/* @file app/user.service.ts */
-createUser(newUser: string): Promise<boolean> {
-  let user: User = {
-    id: +new Date(),
-    name: newUser,
-    isEdit: false
-  }
-  this.users.push(user)
-  return Promise.resolve(true)
-}
-```
-
-这里返回`true`来替代之前的`user`，在返回之前把创建的user保存在`users`数组中。
-
-因为有了`users`，返回数据方法`UserService#getUsers`也需要改变：
-
-```typescript
-/* @file app/user.service.ts */
-getUsers(): Promise<User[]> {
-  return Promise.resolve(this.users)
-}
-```
-
-这样我们还需要一个返回单个user的方法，用来在用户详情页显示数据：
-
-```typescript
-/* @file app/user.service.ts */
-getUser(id: number): Promise<User> {
-  let _user: User = this.users.find(user => user.id === id)
-  return Promise.resolve(_user)
-}
-```
-
-注意这两个方法返回值的签名。这样就有了基本设施。但还不算完，对应`app/user-list.component.ts`组件的`createUser`也需要修改：
-
-```typescript
-/* @file app/user-list.component.ts */
-createUser(): void {
-  if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
-  this._service.createUser(this.newUser)
-}
-```
-
-这就木问题了，接下来要做的就是在`app/user-detail.component.ts`中添加逻辑，来显示内容。和`user-list`如出一辙，需要一个属性和初始化方法：
-
-
-```typescript
-/* @file app/user-detail.component.ts */
-import { User, UserService } from './user.service'
-
-export class UserDetailComponent implements OnInit {
-  constructor(private _router: Router,
-              private _service: UserService) {}
-
-  user: User
-
-  ngOnInit() {
-    /* getUser(id) */
-  }
-}
-```
-
-初始化方法要怎么写呢，现在需要的是地址栏路由中的动态段，也就是`:id`。想要获取这个值，需要用到`RouteParams`：
-
-```typescript
-/* @file app/user-detail.component.ts */
-import { Router, RouteParams, ROUTER_DIRECTIVES } from 'angular2/router'
-
-export class UserDetailComponent implements OnInit {
-  constructor(private _router: Router,
-              private _params: RouteParams,
-              private _service: UserService) {}
-
-  user: User
-
-  ngOnInit() {
-    let id = +this._params.get('id')
-    this._service.getUser(id).then(user => this.user = user)
-  }
-}
-```
-
-在构造时就传入组件，然后可以用`this._params.get`来获取动态段的值。
-
-剩下的工作就很简单了，修改模板`app/user-detail.component.html`：
-
-```typescript
-<!-- @file app/user-detail.html -->
-<div *ngIf="user">{{user.name}}</div>
-```
-
-来试试我们的努力吧。
-
-最后来看下我们的所有文件吧，他们是：
-
-* index.html
-* app/boot.ts
-* app/app.component.ts
-* app/user-list.component.ts
-* app/user-list.component.html
-* app/user-detail.component.ts
-* app/user-detail.component.html
-* app/user.service.html
-
-```html
-<!-- @file index.html -->
-<!DOCTYPE html>
-<html>
-  <head>
-    <base href="/">
-		
-    <title>Angular 2 QuickStart</title>
-    <link rel="stylesheet" href="styles/index.css" type="text/css" media="screen" />
-
-    <!-- 1. Load libraries -->
-    <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
-    <script src="node_modules/systemjs/dist/system.src.js"></script>
-    <script src="node_modules/rxjs/bundles/Rx.js"></script>
-    <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
-    <script src="node_modules/angular2/bundles/router.dev.js"></script>
-		
-    <!-- 2. Configure SystemJS -->
-    <script>
-    System.config({
-      packages: {
-        app: {
-          format: 'register',
-          defaultExtension: 'js'
-        }
-      }
-    });
-    System.import('app/boot')
-      .then(null, console.error.bind(console));
-    </script>
-
-  </head>
-
-  <!-- 3. Display the application -->
-  <body>
-    <my-app>Loading...</my-app>
-  </body>
-
-</html>
-```
-
-```typescript
-/* @file app/boot.ts */
-import { bootstrap } from 'angular2/platform/browser'
-import { AppComponent } from './app.component'
-import { ROUTER_PROVIDERS } from 'angular2/router'
-
-bootstrap(AppComponent, [ROUTER_PROVIDERS])
-```
-
-```typescript
-/* @file app/app.component.ts */
-import { Component } from 'angular2/core'
-import { RouteConfig, ROUTER_DIRECTIVES, RouteDefinition } from 'angular2/router'
-import { UserListComponent } from './user-list.component'
-import { UserDetailComponent } from './user-detail.component'
-import { UserService } from './user.service'
-
-const component = {
-  selector: 'my-app',
-  directives: [ROUTER_DIRECTIVES],
-  providers: [UserService],
-  template: `
-    <h1>Hello World</h1>
-    <router-outlet></router-outlet>
-    `
-}
-
-const router: RouteDefinition[] = [
-  { path: '/users', name: 'UserList', component: UserListComponent, useAsDefault: true },
-  { path: '/users/:id', name: 'UserDetail', component: UserDetailComponent }
-]
-
-@Component(component)
-@RouteConfig(router)
-export class AppComponent {}
-```
-
-```typescript
-/* @file app/user-list.component.ts */
-import { Component, OnInit } from 'angular2/core'
-import { Router, ROUTER_DIRECTIVES } from 'angular2/router'
-import { User, UserService } from './user.service'
-
-const component = {
-  selector: 'user-list',
-  directives: [ROUTER_DIRECTIVES],
-  templateUrl: 'app/user-list.component.html'
-}
-
-@Component(component)
-export class UserListComponent implements OnInit {
-  constructor(private _service: UserService,
-              private _router: Router) {}
-		
-  users: User[]
-  newUser: string
-
-  getUsersCount(): number {
-    if(!this.users) return 0
-    return this.users.length
-  }
-  createUser(): void {
-    if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
-    this._service.createUser(this.newUser)
-  }
-  deleteUser(user: User): void {
-    this._service.deleteUser(user).then(() => {
-      let idx = this.users.findIndex(userItem => userItem.id === user.id)
-      this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
-    })
-  }
-  updateUser(user: User): void {
-    let toggleEdit: () => void
-    toggleEdit = () => {
-      user.isEdit = !user.isEdit
-    }
-  
-    if(user.isEdit) {
-      this._service.updateUser(user).then(toggleEdit)
-    } else {
-      toggleEdit()
-    }
-  }
-  ngOnInit(): void {
-    this._service.getUsers().then(users => this.users = users)
-  }
-}
-```
-
-```html
-<!-- @file app/user-list.component.html -->
-<div>
-  <label>
-    添加新用户
-    <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
-  </label>
-  <p>要添加的用户为：{{newUser}}</p>
-</div>
-
-<div *ngIf="getUsersCount()">
-  <ul>
-    <li *ngFor="#user of users">
-      <a *ngIf="!user.isEdit" [routerLink]="['UserDetail', {id: user.id}]">{{user.name}}</a>
-      <input *ngIf="user.isEdit" [(ngModel)]="user.name" />
-      <button type="button" (click)="updateUser(user)">
-        <span *ngIf="!user.isEdit">修改</span>
-        <span *ngIf="user.isEdit">完成</span>
-      </button>
-      <button type="button" (click)="deleteUser(user)">删除</button>
-    </li>
-  </ul>
-  <p>用户的数量是：{{getUsersCount()}}</p>
-</div>
-<div *ngIf="!getUsersCount()">
-  <p>木有用户(°Д°)</p>
-</div>
-```
-
-```typescript
-/* @file app/user-detail.component.ts */
-import { Component, OnInit } from 'angular2/core'
-import { Router, RouteParams, ROUTER_DIRECTIVES } from 'angular2/router'
-import { User, UserService } from './user.service'
-
-const component = {
-  selector: 'user-detail',
-  directives: [ROUTER_DIRECTIVES],
-  templateUrl: 'app/user-detail.component.html'
-}
-
-@Component(component)
-export class UserDetailComponent implements OnInit {
-  constructor(private _router: Router,
-              private _params: RouteParams,
-              private _service: UserService) {}
-
-  user: User
-
-  ngOnInit() {
-    let id = +this._params.get('id')
-    this._service.getUser(id).then(user => this.user = user)
-  }
-}
-```
-
-```html
-<!-- @file app/user-detail.html -->
-<h2>User Detail</h2>
-<a [routerLink]="['UserList']">返回</a>
-<div *ngIf="user">{{user.name}}</div>
-```
-
-```typescript
-/* @file app/user.service.ts */
-import { Injectable } from 'angular2/core'
-
-export interface User {
-  id: number
-  name: string
-  isEdit: boolean
-}
-
-@Injectable()
-export class UserService {
-  constructor() { this.users = [] }
-  
-  users: User[]
-  
-  getUsers(): Promise<User[]> {
-    return Promise.resolve(this.users)
-  }
+  //...
   getUser(id: number): Promise<User> {
-    let _user: User = this.users.find(user => user.id === id)
-    return Promise.resolve(_user)
+    let user: User = this.users.find(user => user.id === id)
+    return Promise.resolve(user)
   }
-  createUser(newUser: string): Promise<boolean> {
-    let user: User = {
-      id: +new Date(),
-      name: newUser,
-      isEdit: false
-    }
-    this.users.push(user)
-    return Promise.resolve(true)
-  }
-  deleteUser(user: User): Promise<boolean> {
-    return Promise.resolve(true)
-  }
-  updateUser(user: User): Promise<boolean> {
-    return Promise.resolve(true)
+  //...
+}
+```
+
+现在你应该已经习惯ts的写法了。然后要做的就是在组件中赋值给一个属性：
+
+```typescript
+/* @file app/user-detail.component.ts */
+import { User, UserService } from './user.service'
+
+export class UserDetailComponent implements OnInit {
+  constructor(private _service: UserService
+              private _params: RouteParams) {}
+    
+  user: User
+
+  ngOnInit() {
+    let id = +this._params.get('id')
+    this._service.getUser(id).then(user => this.user = user)
   }
 }
 ```
+
+在模板中显示出来：
+
+```html
+<h2>User Detail</h2>
+<div *ngIf="user">{{user.name}}</div>
+<a [routerLink]="['UserList']">返回</a>
+```
+
+Ok，来试试看。
 
 # 回归主题，新年快乐！
 
-草草的结束了，但就作为入门来说足够。还有好多东西没有做，更新和删除方法还没有重写，也有一些好玩的特性没有介绍，比如**pipe**，**@input**和**@output**，也没有真正的持久化数据，打包原生App也没做。但是，这些事情就交给你，我想他们应该很简单。
+我们的ng2之路要告一段落了，但这还只是刚刚开始。相对于react和ember2,他们各自都有优缺点。
 
-接下来要做的，我建议自己独立实现一个Todos。Todos完成后就可以踏上真正的ng2之路，这条路虽不会像react那样的平稳，但只要努力，这些都不是问题，对么？:v:
+接下来的事还有很多，我建议你自己独立实现一个[Todos](http://todomvc.com)，来熟悉一下ng2的各个部分。
 
-那么，新年快乐(｡◕‿◕｡)
+然后就是看看api文档和ng2源码，顺便一体，ng2的源码是由ts写的，很赞。
 
-See you again.:two_hearts:
+当然，我们还会再见的，在附录部分还有一些有意思的主题。
+
+那么，新年快乐(｡◕‿◕｡)，bye ~
+
+And See you again.:two_hearts:
 
 # 附录，TypeScript 101
 
