@@ -752,7 +752,7 @@ const component = {
 
 [回到顶部](#)
 
-# 揉揉眼睛，你不会走开的对不
+# 揉揉眼睛，你不会走开的对吧
 
 添加功能，一定要有输入框，让我们有诚意的为其添加一个：
 
@@ -929,7 +929,9 @@ export class UserListComponent implements OnInit {
 
 试一下功能，OK，木有问题。
 
-# 还不到休息的时候，还要再接再厉
+[回到顶部](#)
+
+# 还不到休息的时候，还需要再接再厉
 
 很好，一鼓作气实现了增加和删除功能。也对`service`有了一个大概的了解。接下来就来继续实现修改功能。
 
@@ -1118,7 +1120,7 @@ class UserList extends React.Component {
 }
 ```
 
-还记得这个么？在react中，我们把方法名传给子组件，在子组件中调用父组件的方法。如果记忆犹新的话，那就来看看ng2的做法吧：
+还记得这个么？在react中，我们把方法名传给子组件，在子组件中用`this.props.OnUpdateUser()`来调用父组件的方法。如果还记忆犹新的话，那就来看看ng2的做法吧：
 
 ```typescript
 /* @file app/user-list.component.ts */
@@ -1144,87 +1146,26 @@ export class UserItemComponent implements OnInit {
 }
 ```
 
+大体功能就是这般，在父组件模板中传入一个`$event`，来表示回传的值。子组件用`this.updateUser.next(this.username)`来传递，在这之前要先用`@output`注解表示`updateUser`是一个“可输出”的方法。
 
+这是我们观察到`UserListComponent`中的`template`规模已经不小了，而且手拼标签简直是丧心病狂，这里告诉你一个好玩的功能，那就是用`templateUrl`来代替`template`。
 
-
-
-这里需要依赖`user`的`isEdit`属性，还木有怎么办。这有点棘手，需要修改一些地方。首先要修改一下新增方法`createUser`，在新增时给`user.isEdit`加一个默认值`false`：
-
-```typescript
-/* @file app/user.service.ts */
-createUser(newUser: string): Promise<User> {
-  return Promise.resolve({
-    id: +new Date(),
-    name: newUser,
-    isEdit: false
-  })
-}
-```
-
-现在看下控制台服务，糟糕，TypeScript报错了，说与`User`类型不符。当然，我们的`User`类型并没有`isEdit`，给他加一个：
-
-```typescript
-/* @file app/user.service.ts */
-export interface User {
-  id: number
-  name: string
-  isEdit: boolean
-}
-```
-
-解决了`User`的类型问题就可以继续实现`updateUser`了，还是老样子，先实现`service`的`updateUser`：
-
-```typescript
-/* @file app/user.service.ts */
-updateUser(user: User): Promise<boolean> {
-  return Promise.resolve(true)
-}
-```
-
-和`deleteUser`一样，只需简单的返回`true`就好了，接下来实现组件的`updateUser`：
-
-```typescript
-/* @file app/user-list.component.ts */
-updateUser(user: User): void {
-  let toggleEdit: () => void
-  toggleEdit = () => {
-    user.isEdit = !user.isEdit
-  }
-  
-  if(user.isEdit) {
-    this._service.updateUser(user).then(toggleEdit)
-  } else {
-    toggleEdit()
-  }
-}
-```
-
-`toggleEdit`用来切换`isEdit`的状态，然后在编辑时切换状态，编辑完成点击按钮时发送请求，之后切换状态。
-
-来试一下，没有问题。当然如果你愿意，可以把按钮的`updateUser`移到输入框中。
-
-现在为止，模板的内容已经很多了，是时候把他单独放在一个文件中。新建一个`app/user-list.component.html`，把`template`的内容复制在新文件中：
+首先新建一个文件`app/user-list.component.html`，将`template`中的内容复制过去：
 
 ```html
 <!-- @file app/user-list.component.html -->
 <div>
   <label>
     添加新用户
-    <input type="text" [(ngModel)]="newUser" placeholder="请输入用户名" (keyup.enter)="createUser()" />
+    <input type="text" [(ngModel)]="username" placeholder="请输入用户名" (keyup.enter)="createUser()" />
   </label>
-  <p>要添加的用户为：{{newUser}}</p>
+  <p>要添加的用户为：{{username}}</p>
 </div>
-
 <div *ngIf="getUsersCount()">
   <ul>
     <li *ngFor="#user of users">
-      <span *ngIf="!user.isEdit">{{user.name}}</span>
-      <input *ngIf="user.isEdit" [(ngModel)]="user.name" />
-      <button type="button" (click)="updateUser(user)">
-        <span *ngIf="!user.isEdit">修改</span>
-        <span *ngIf="user.isEdit">完成</span>
-      </button>
-      <button type="button" (click)="deleteUser(user)">删除</button>
+      <user-item [user]="user" (updateUser)="updateUser(user, $event)"></user-item>
+      <a (click)="deleteUser(user)">删除</a>
     </li>
   </ul>
   <p>用户的数量是：{{getUsersCount()}}</p>
@@ -1234,136 +1175,64 @@ updateUser(user: User): void {
 </div>
 ```
 
-之前的`template`不再需要了，改为：
+在组件中改为：
 
 ```typescript
 /* @file app/user-list.component.ts */
-templateUrl: 'app/user-list.component.html'
-```
-
-让我们再来看看两个重要文件`app/user-list.component.ts`和`app/user.service.ts`：
-
-```typescript
-/* @file app/user-list.component.ts */
-import { Component, OnInit } from 'angular2/core'
-import { User, UserService } from './user.service'
-
 const component = {
-  selector: 'user-list',
-  templateUrl: 'app/user-list.component.html'
-}
-
-@Component(component)
-export class UserListComponent implements OnInit {
-  constructor(private _service: UserService) {}
-
-  users: User[]
-  newUser: string
-
-  getUsersCount(): number {
-    if(!this.users) return 0
-    return this.users.length
-  }
-
-  createUser(): void {
-    if(typeof this.newUser !== 'string' || !this.newUser.trim()) return;
-    this._service.createUser(this.newUser).then(user => {
-      this.users = this.users.concat(user)
-      this.newUser = '';
-    })
-  }
-
-  deleteUser(user: User): void {
-    this._service.deleteUser(user).then(() => {
-      let idx = this.users.findIndex(userItem => userItem.id === user.id)
-      this.users = [].concat(this.users.slice(0, idx)).concat(this.users.slice(idx + 1))
-    })
-  }
-
-  updateUser(user: User): void {
-    let toggleEdit: () => void
-    toggleEdit = () => {
-      user.isEdit = !user.isEdit
-    }
-  
-    if(user.isEdit) {
-      this._service.updateUser(user).then(toggleEdit)
-    } else {
-      toggleEdit()
-    }
-  }
-		
-  ngOnInit(): void {
-    this._service.getUsers().then(users => this.users = users)
-  }
-}
+  templateUrl: 'app/user-item.component.html'
+} 
 ```
 
-```typescript
-/* @file app/user.service.ts */
-import { Injectable } from 'angular2/core'
+同样，我们也为`UserItemComponent`做一个模板，新建`app/user-item.component.html`：
 
-export interface User {
-  id: number
-  name: string
-  isEdit: boolean
-}
-
-@Injectable()
-export class UserService {
-  getUsers(): Promise<User[]> {
-    return Promise.resolve([])
-  }
-  createUser(newUser: string): Promise<User> {
-    return Promise.resolve({
-      id: +new Date(),
-      name: newUser,
-      isEdit: false
-    })
-  }
-  deleteUser(user: User): Promise<boolean> {
-    return Promise.resolve(true)
-  }
-  updateUser(user: User): Promise<boolean> {
-    return Promise.resolve(true)
-  }
-}
+```html
+<!-- @file app/user-item.component.html -->
+<span *ngIf="!isEdit">{{user.name}}</span>
+<input *ngIf="isEdit" [(ngModel)]="username" />
+<a *ngIf="!isEdit" (click)="beginEdit()">修改</a>
+<a *ngIf="isEdit" (click)="endEdit()">完成</a>
 ```
+
+组件中的处理方法相同。
+
+浏览器刷新后试下功能，Ok。给你三分钟时间休息，后面还有更重要的内容等着你。
+
+[回到顶部](#)
 
 # 当然，还有重要的东西没有说
 
-对于修改，我并不是很满意，原因是每个用户往往都有对应的详细页面来去做这些事情。这就要轮到路由出场了，来会会我们的老朋友吧。
+对于修改，其实一开始我是拒绝的，原因是通常每个用户都有对应的详细页面来去做这些事情。
+
+在单页App中想要实现这个功能，就要轮到**路由**出场了，来会会我们的老朋友吧。
 
 使用路由要进行一些麻烦的配置，那就从外往里修改好了，首先就是启动文件`app/boot.ts`：
 
 ```typescript
-import { bootstrap } from 'angular2/platform/browser'
-import { AppComponent } from './app.component'
+/* @file app/boot.ts */
+//...
 import { ROUTER_PROVIDERS } from 'angular2/router'
 
 bootstrap(AppComponent, [ROUTER_PROVIDERS])
 ```
 
-然后是`app/app.component.ts`：
+然后是`AppComponent`：
 
 ```typescript
 /* @file app/app.component.ts */
-import { Component } from 'angular2/core'
 import { RouteConfig, ROUTER_DIRECTIVES } from 'angular2/router'
-import { UserListComponent } from './user-list.component'
-import { UserService } from './user.service'
 
 const component = {
-  selector: 'my-app',
+  //...
   directives: [ROUTER_DIRECTIVES],
-  providers: [UserService],
   template: `
     <h1>Hello World</h1>
     <router-outlet></router-outlet>
   `
+  //...
 }
 
-const router: RouteDefinition = [
+const router: RouteDefinition[] = [
   { path: '/users', name: 'UserList', component: UserListComponent, useAsDefault: true }
 ]
 
@@ -1372,58 +1241,51 @@ const router: RouteDefinition = [
 export class AppComponent {}
 ```
 
-接下来是熟悉的组件`app/user-list.component.ts`:
-
-```typescript
-/* @file app/user-list.component.ts */
-import { Router } from 'angular2/router'
-
-constructor(private _service: UserService,
-            private _router: Router) {}
-```
-
 有点多，来依次看看。
 
-在`app/boot.ts`中，引入了`ROUTER_PROVIDERS`，用来将路由注入到组件中。而在`app/app.component.ts`引入了`RouteConfig`和`ROUTER_DIRECTIVES`。`RouteConfig`就是稍后看到的`@RouteConfig`注解，而`ROUTER_DIRECTIVES`是模板中的`<router-outlet>`，作用是占位符。接下来的：
+在`app/boot.ts`中，引入了`ROUTER_PROVIDERS`，用来将路由注入到组件中。在`app/app.component.ts`引入了`RouteConfig`和`ROUTER_DIRECTIVES`。`RouteConfig`就是你所看到的`@RouteConfig`注解，而`ROUTER_DIRECTIVES`是模板中的`<router-outlet>`，作用是占位符，之前的`<user-list>`现在可以去掉了。接下来：
 
 ```typescript
-const router = [
-  { path: '/user-list', name: 'UserList', component: UserListComponent, useAsDefault: true }
+const router: RouteDefinition[] = [
+  { path: '/users', name: 'UserList', component: UserListComponent, useAsDefault: true }
 ]
 ```
 
-就是路由的定义了。路由定义和其他框架类似，`path`是必须的，代表了路径；`name`是名称；`component`是替代`<router-outlet>`的组件；`useAsDefault: true`则表示路由到根目录`/`时，默认采用这个组件。
+这个就是路由的定义了。路由定义和其他框架类似，`path`是必须的，表示路径；`name`是名称；`component`是用来替代`<router-outlet>`位置的组件；`useAsDefault: true`则表示路由到根目录`/`时，默认采用这个组件，就是默认路由，意思就是访问`/`时，就跳转到`/users`。而`RouteDefinition`是他的类型。
 
-再来看看`app/user-list.component.ts`。更新的地方就是组件类的构造函数，多加了一个参数`private _router: Router`，他的签名是`Router`，已经在上边导入了。
-
-这时更新浏览器，报木有找到`angular2/router`。原因是`router`并没有在核心`core`中实现，需要另外引入，怎么做呢？只需要把脚本仍在`index.html`就好了：
+如果这时更新浏览器，会报木有找到`angular2/router`。原因是`router`并不是ng2核心`core`中的实现，需要另外引入，怎么做呢？只需要把脚本仍在`index.html`就好了：
 
 ```html
 <!-- @file index.html -->
-<script src="node_modules/angular2/bundles/router.dev.js"></script>
+<head>
+  <!-- ... -->
+  <script src="node_modules/angular2/bundles/router.dev.js"></script>
+</head>
 ```
 
 当然，单页App还需要一个标签，那就是：
 
 ```html
 <!-- @file index.html -->
-<base href="/">
+<head>
+  <base href="/">
+  <!-- ... -->
+</head>
 ```
 
-现在等待浏览器刷新。路径会默认变为`localhost:3000/users`。
+等待浏览器刷新后。路径会默认变为`localhost:3000/users`。
 
-接下来回归主题，配合路由，我要实现的功能是：
+接下来回归主题，配合路由，我们要实现的功能是：
 
 * 访问`localhost:3000/users/1`时，表示访问`id`为`1`用户的详情；
 * 在每个`user`后边加一个链接，跳转到对应的详情页；
 * 在详情页添加一个返回按钮，返回`users`，即用户列表
 
-当然，目前为止还没有`user`详情的组件，那就来创建一个吧。新建`app/user-detail.component.ts`和`app/user-detail.component.html`。
+当然，目前为止还没有`user`详情的组件，那就来创建一个吧，取名`UserDetailComponent`。新建`app/user-detail.component.ts`和`app/user-detail.component.html`：
 
 ```typescript
 /* @file app/user-detail.component.ts */
 import { Component } from 'angular2/core'
-import { Router } from 'angular2/router'
 
 const component = {
   selector: 'user-detail',
@@ -1431,9 +1293,7 @@ const component = {
 }
 
 @Component(component)
-export class UserDetailComponent {
-  constructor(private _router: Router) {}
-}
+export class UserDetailComponent {}
 ```
 
 ```html
@@ -1441,7 +1301,7 @@ export class UserDetailComponent {
 <h2>User Detail</h2>
 ```
 
-接下来就按照我们的计划，先来定义路由，那么还是在`app/app.component.ts`添加一条路由规则：
+接下来就按照我们的计划，先来定义一个路由，在`app/app.component.ts`添加一条路由规则：
 
 ```typescript
 /* @file app/app.component.ts */
@@ -1453,33 +1313,32 @@ const router: RouteDefinition[] = [
 ]
 ```
 
-路由`path`中的`:id`表示动态段，就是说，这条路由可以匹配`/users/1`，也可以匹配`/users/666666`。当然，这里就不需要`useAsDefault`了。由于用到了组件`UserDetailComponent`，需要在开始处导入。
+路由`path`中的`:id`表示动态段，就是说，这条路由规则可以匹配`/users/1`，也可以匹配`/users/666666`。 当然，这里就不需要`useAsDefault`了。
 
-接下来实现第二条，这需要修改我们的老朋友`app/user-list.component.html`：
+接下来实现第二条，这需要修改我们的老朋友`app/user-item.component.html`：
 
 ```html
-<!-- @file app/user-list.html -->
-<a *ngIf="!user.isEdit" [routerLink]="['UserDetail', {id: user.id}]">{{user.name}}</a>
+<!-- @file app/user-item.component.html -->
+<a *ngIf="!isEdit" [routerLink]="['UserDetail', {id: user.id}]">{{user.name}}</a>
+<!-- ... -->
 ```
 
-这里只需要把之前的`<span>`标签改为`<a>`标签就好，需要注意的是`[routerLink]="['UserDetail', {id: user.id}]"`，这是干嘛的呢。我想你已经猜到了，这句就相当于`<a href="/users/:id">`，`UserDetail`我们在`app/app.component.ts`的路由里面定义过，就是`name`值，`{id: user.id}`的意思也很明了，就是把动态段`:id`的值赋予`user.id`。
+因为要做链接，这里需要把之前的`<span>`改为`<a>`标签，需要注意的是`[routerLink]="['UserDetail', {id: user.id}]"`，这是干嘛的？。我想你已经猜到了，这句就相当于`<a href="/users/:id">`，`UserDetail`我们在路由里面定义过，就是`name`值，`{id: user.id}`的意思也很明了，就是把动态段`:id`的值赋予`user.id`。
 
-这样还不算完，用到`[routerLink]`要付出一点代价，那就是需要把他先引入组件中，修改`app/user-list.component.ts`：
+这样还不算完，用到`[routerLink]`要付出一点点代价，需要把他先引入组件中，修改`UserItemComponent`：
 
 ```typescript
-/* @file app/user-list.component.ts */
-import { Router, ROUTER_DIRECTIVES } from 'angular2/router'
+/* @file app/user-item.component.ts */
+import { ROUTER_DIRECTIVES } from 'angular2/router'
 
 const component = {
-  selector: 'user-list',
+  //...
   directives: [ROUTER_DIRECTIVES],
-  templateUrl: 'app/user-list.component.html'
+  //...
 }
 ```
 
-`directives`就是需要修改的地方，和最开始在`app/app.component.ts`需要用`<user-list>`时是一样的。
-
-还有最后要做的，就是添加一个返回链接。修改`app/user-detail.component.ts`：
+还有最后要做的，就是在详情页添加一个返回链接。修改`UserDetailComponent`：
 
 ```html
 <!-- @file app/user-detail.html -->
@@ -1490,18 +1349,30 @@ const component = {
 
 ```typescript
 /* @file app/user-detail.component.ts */
-import { Router, ROUTER_DIRECTIVES } from 'angular2/router'
+import { ROUTER_DIRECTIVES } from 'angular2/router'
 
 const component = {
-  selector: 'user-detail',
+  //...
   directives: [ROUTER_DIRECTIVES],
-  templateUrl: 'app/user-detail.component.html'
+  //...
 }
 ```
 
-搞定，来试试看。可以来回跳转，但是，详细页的数据要怎么显示？
+来试试我们的新功能吧。Ok，可以来回跳转，但是，详细页的数据要怎么显示？
 
 # 恩，这确实是个难点
+
+接下来还剩下最后一个功能，就是在详细页面显示出用户的姓名。
+
+因为路由中动态段中有`id`，所以最简单的办法就是取这个`id`，然后在`service`中取得对应`id`的`user`。
+
+要取得地址栏中的`id`，我们需要用到`RouteParams`。修改组件`UserDetailComponent`：
+
+```typescript
+
+```
+
+
 
 详细页的数据要怎么显示？这有点棘手，原因是并没有保存过任何创建的`user`。看来首先要做的就是保存`users`，怎么做呢？
 
