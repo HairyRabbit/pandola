@@ -2049,13 +2049,13 @@ let test = id<string>('hello world')
 
 接下来可以去参考官方文档和一些在线资料：
 
-[TypeScript handbook](http://www.typescriptlang.org/Handbook)
-[TypeScript lang spec](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)
-[TypeScript Deep Dive](https://basarat.gitbooks.io/typescript/content/)
+* [TypeScript handbook](http://www.typescriptlang.org/Handbook)
+* [TypeScript lang spec](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)
+* [TypeScript Deep Dive](https://basarat.gitbooks.io/typescript/content/)
 
 当然，还有一些中文资源：
 
-[TypeScript Handbook（中文版）](https://zhongsp.gitbooks.io/typescript-handbook/content/)
+* [TypeScript Handbook（中文版）](https://zhongsp.gitbooks.io/typescript-handbook/content/)
 
 学习ts进一步可以提高对js的认知，并且能够写出优雅的代码。值得入手程度：:star2::star2::star2::star2::star2:
 
