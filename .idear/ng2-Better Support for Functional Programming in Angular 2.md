@@ -1,19 +1,17 @@
-# ng2更好的支持函数式编程
+# Angular2更好的支持函数式编程
 
 本文来自于 [Better Support for Functional Programming in Angular 2](http://victorsavkin.com/post/108837493941/better-support-for-functional-programming-in)
 
 这篇文章将讨论Angular2中的变化，以及对函数式编程的支持情况。
 
-Angular2目前依然处于开发阶段，还没有稳定，本文例子可能会变化。但请把关注点放在功能和理论的讨论上，而不揪着API不放。
+Angular2目前依然处于开发阶段，还没有稳定，本文的例子可能会变化。但请不要在意这些细节，把关注点放在功能和理论的讨论上，而不揪着API不放。
 
 ## 为什么要使用函数式编程
 
-想象程序是由一个个嵌套组件构成的。并且我们应该这样做：
+如果想象程序是由一个个嵌套组件构成的，我们就应该这样做：
 
 * 组件只决定于自身值绑定和他的子组件
 * 组件只能影响他的子组件
-
-
 
 例如，`Todo Component`不应该影响除了`Input`外的任何其他组件。
 
@@ -39,11 +37,11 @@ Instead we should model our domain using dumb data structures, such as record-li
 
 Since Angular does not use KVO, and uses dirty-checking instead, it does not require us to wrap our data into model classes. So we could always use arrays and simple objects as our model.
 
-由于ng2不使用KVO（Key-Value-Observing），而是用脏值检查代替，他不需要我们用我们的数据模型类。所以我们通常可以使用数组和简单对象做为我们的模型。
+由于ng2没有使用KVO（Key-Value-Observing），而是用了脏值检查代替，所以我们不需要在数据外套一层壳子，仅仅使用数组和对象来做为我们的model就可以了。
 
-> KVO是一种观察者机制，就是说当属性被修改后，响应的观察者会得到通知。
+> KVO是一种观察者机制，就是说当属性被修改后，响应的观察者会得到通知。这个机制可以用来实现双向绑定。
 
-> 脏值检查
+> 脏值检查和KVO一样，也是实现双向绑定的一种机制。Angular2中脏值检查使用[zone.js]((https://github.com/angular/zone.js))库来实现。
 
 ```typescript
 class TodosComponent {
@@ -70,47 +68,44 @@ class TodosComponent {
 
 Here, for example, todos is an array of simple objects. Note, we do not mutate any of the objects. And we can do it because the framework does not force us to build a mutable domain model.
 
-这里，todos是一个数组。请注意，我们没有改变任何对象，我们可以这样做是因为ng2不强迫必须用可变量。
+这里，todos是一个简单数组。但要注意，我们并没有改变任何属性（map，filter会返回一个新的绑定，而不是改变原来变量的值），我们可以这样做是因为ng2不要求必须使用可变量。
 
-We can already write this kind of code in Angular today. What we want is to make it smoother, and take advantage of it performance wise.
+函数式的代码看起来更优雅，并且性能也不错。
 
-我们现在已经可以把这种代码写在今天了。我们所希望的是使他更顺畅，并充分利用他的性能。
-
-## Using Persistent Data Structures
-
-使用持久化数据结构
+## 持久化数据结构
 
 For example, we want to improve the support of persistent data structures.
 
-例如，我们要改进持久性数据结构的支持。
+现在，我们要改进对持久化数据结构的支持。
 
 First, we want to support even most exotic collections. And, of course, we do not want to hardcode this support into the framework. Instead, we are making the new change detection system pluggable. So we will be able to pass any collection to ng-repeat or other directives, and it will work. The directives will not have to have special logic to handle them.
 
-首先，我们要支持各式各样的集合。当然，我们不想硬编码到框架中。相反，我们正在制定新的变化检测系统插件。因此，我们将能够通过任何收集到的重复或其他指令，它将工作。指令将不需要有特殊的逻辑来处理他们。
+首先，我们要支持各式各样的集合数据结构（例如Immutable.js定义的数据结构，或是es6中的Set，Map等等）。
+
+当然，我们可不能直接写在框架中。与之相反的是，我们会实现检测变化的逻辑。因此，我们能够使用`ng-repeat`或其他指令来工作。这些指令将不需要有特殊的逻辑来处理他们。
 
 ```typescript
-<todo template=”ng-repeat: #t in: todos” [todo]=”t”></todo> // what is todos? array? immutable list? does not matter.
+<todo template=”ng-for: #t in todos” [todo]=”t”></todo> 
+
+// todos是什么？数组？immutable的list？无所谓。
 ```
 
-Second, we can also take advantage of the fact that these collections are immutable. For example, we can replace an expensive structural check to see if anything changed with a simple reference check, which is much faster. And it will be completely transparent to the developer.
+其实，我们可以充分利用不可变性的特征。
 
-其实，我们也可以利用这些集合是不可变的事实。例如我们可以更换一个结构检查，看看是否有任何改变了一个简单的参考检查，这是更快的。对于开发者而言，这是完全透明的。
+对于检查一个值是否变了，用直接给他赋新的值的方式，显然要更快一些。并且对于开发者而言，这是完全透明的操作。
 
-## Controlling Change Detection
+## 控制状态的改变
 
-控制变化检测
+函数式编程限制了状态的改变，他使得属性在变化时格外明显。这为我们编写可扩展应用程序提供了强有力的武器。即便Javascript语言本身并不提供这种保证。
 
-Functional programming limits the number of ways things change, and it makes the changes more explicit. So because our application written in a functional way, we will have stronger guarantees, even though the JavaScript language itself does not provide those guarantees.
-
-函数式编程限制了状态的改变，他使得改变更加明显。因为我们编写的应用程序功能的方式，我们将有更强的保证，即便Javascript语言本身并不提供这种担保。
-
-For example, we may know that a component will not change until we receive some event. Now, we will be able to use this knowledge and disable the dirty-checking of that component and its children altogether.
-
-例如，我们可以知道，一个组件不会变化直到我们收到一些事件。现在，我们将能够使用这方面的知识，并禁用该组件和它的子组件的脏值检查。
+例如，我们知道，事件会引起属性的改变。现在，我们将演示如何通过不可变性，绕过脏值检查。
 
 A few examples where this feature can come handy: * If a component depends on only observable objects, we can disable the dirty-checking of the component until one of the observables fires an event. * If we use the FLUX pattern, we can disable the dirty-checking of the component until the store fires an event.
 
-下面的例子，这个功能可以派上用场：如果一个组件只依赖于observable，我们就可以禁用组件的脏值检查直到observable触发一个事件；如果我们使用flux模式，我们可以禁用组件的脏值检查，直到store触发一个事件。
+下面的例子，这个功能可以派上用场：
+
+* 如果组件依赖于observable，我们就可以利用他触发`onChange`事件来绕过脏值检查。；
+* 也可以使用flux模式触发store的action来绕过脏值检查检查。
 
 ```typescript
 class TodosComponent {
@@ -130,21 +125,20 @@ class TodosComponent {
 
 Our applications are not just projections of immutable data onto the DOM. We need to handle the user input. And the primary way of doing it today is NgModel.
 
-我们的程序不只是检测数据到dom。我们需要处理用户输入，今天的主要方式是使用NgModel
+我们的程序不仅仅是把数据绑定到dom。有时还需要处理用户输入。目前使用最多的就是NgModel。
 
 
 NgModel is a convenient way of dealing with the input, but it has a few drawbacks:
 
 NgModel 是一个处理用户输入很方便的方式，但他有一些缺点：
 
-* It does not work with immutable objects.
 * 他不能作用于不可变对象
 * It does not allow us to work with the form as a whole.
-* 他不能允许我们以一个整体的form来工作
+* 他不允许我们以一个整体的form来工作
 
 For instance, if in the example below todo is immutable, which we would prefer, NgModel just will not work.
 
-例如，如果下面的例子中todo是不可变的，我们就希望NgModel不要工作。
+例如，如果下面的例子中todo是不可变的，我们就希望NgModel不要自动更新属性。
 
 ```html
 <form>
@@ -154,9 +148,7 @@ For instance, if in the example below todo is immutable, which we would prefer, 
 </form>
 ```
 
-So NgModel forces us to copy the attributes over and reassemble them back after we are done editing them.
-
-所以，NgModel 迫使我们编辑完他们后复制属性和组装他们。
+所以，这样不得不在编辑完成后对属性重新赋值。
 
 ```typescript
 class TodoComponent {
@@ -182,16 +174,11 @@ class TodoComponent {
 }
 ```
 
-This is not a bad solution, but we can do better than that.
+使用set这也是一个办法，但我们可以做的更好。
 
-这不是一个坏的办法，但是我们可以做的更好。
+处理表单更好的方式是将他们作为流来处理。应用FRP技术，我们可以监听这些流，map他们。
 
-A better way of dealing with forms is treating them as streams of values. We can listen to them, map them to another stream, and apply FRP techniques.
-
-处理表单更好的方法是将他们作为流来处理流的值。我们可以监听他们，遍历其他流或是应用FRP技术。
-
-Template:
-模板
+模板：
 
 ```html
 <form [control-group]="filtersForm">
@@ -200,8 +187,7 @@ Template:
 </form>
 ```
 
-Component:
-组件
+组件：
 
 ```typescript
 class FiltersComponent {
@@ -217,13 +203,9 @@ class FiltersComponent {
 }
 ```
 
-We can also take the current value of the whole form, like shown below.
+我们也可以采用当前整个表单的值，像下面这样。
 
-我们也可以采取当前整个表单的值，像下面这样。
-
-Template:
-
-模板
+模板：
 
 ```html
 <form #todoForm [new-control-group]="todo">
@@ -233,9 +215,7 @@ Template:
 </form>
 ```
 
-Component:
-
-组件
+组件：
 
 ```typescript
 class TodoComponent {
@@ -252,16 +232,9 @@ class TodoComponent {
 }
 ```
 
-Summary
-
 总结
 
-* We want to be able to reason about every component in isolation. And we want changes to be predictable and controlled. Functional programming is a common way of achieving it.
-* Data-oriented programming is a big part of it. Although Angular has always supported it, there are ways to make it even better. For example, by improving support of persistent data structures.
-* When using functional programming we have stronger guarantees about how things change. We will be able to use this knowledge to control change detection.
-* The current way of dealing with dealing with the user input, although convenient, promotes mutability. A more elegant way is to treat forms as values, and streams of values.
-
-* 我们希望能够对每一个组件隔离。我们希望改变是可预测和可控的。函数式编程是实现他的一种常见方法。
-* 面向数据编程是他的一个重要部分，虽然ng2一直支持他，有办法让他更好。例如通过改进支持数据结构的支持。
-* 当使用函数式编程时，我们有更强的保证，关于如何改变。我们将能够使用这方面的只是来控制变化检测。
-* 目前的处理方式，处理用户输入，虽然方便，促进性。一个更优雅的方式是把表单作为一个值和一个流的值。
+* 组件应该是独立的，状态应该是可控的，而函数式编程可以实现这一点。
+* 面向数据编程是ng2的一个重要部分，虽然ng2一直支持他，但是使用不可变性可以做的他更好。
+* 当使用函数式编程时，我们就有了一个强大的武器来控制可变状态。
+* 使用ngModel，处理用户输入，虽然方便。但把表单作为一个流来看待无疑会更优雅。
